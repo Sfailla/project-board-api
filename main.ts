@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import express, { Application, Request, Response } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import path from 'path'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
@@ -10,7 +11,7 @@ import { TerminalColors } from './src/types/shared'
 
 dotenv.config()
 
-const resolverPaths = `${__dirname}/src/resolvers/*{.js,.ts}`
+const resolverPaths = path.join(__dirname, '/src/resolvers/*{.js,.ts}')
 
 const app: Application = express()
 

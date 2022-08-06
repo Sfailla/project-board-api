@@ -1,0 +1,12 @@
+# IDE
+.vscode
+
+# BUILD FILES
+dist
+
+# PACKAGES
+node_modules
+
+# CONFIG FILES
+.env
+

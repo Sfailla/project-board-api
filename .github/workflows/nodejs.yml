@@ -2,12 +2,13 @@ name: Github Actions
 on: [push]
 
 jobs:
-  runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-  steps:
-    - run: npm ci --no-audit
-    - run: npm run lint --if-present
-    - run: npm test
-    - run: npm run build --if-present
-      env:
-        CI: true
+    steps:
+      - run: npm ci --no-audit
+      - run: npm run lint --if-present
+      - run: npm test
+      - run: npm run build --if-present
+        env:
+          CI: true

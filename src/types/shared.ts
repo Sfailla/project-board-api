@@ -10,3 +10,31 @@ export enum TerminalColors {
 	Black = '\x1b[30m%s\x1b[0m',
 	Default = '%s'
 }
+
+export enum ProjectBoardStatus {
+	Open = 'open',
+	InProgress = 'in-progress',
+	Review = 'review',
+	Complete = 'complete'
+}
+
+export interface User {
+	id: number
+	firstname?: string | null
+	lastname?: string | null
+	username: string
+	email: string
+	password: string
+	company?: string | null
+	position?: string | null
+	avatar?: Buffer | string | null
+	createdAt: Date
+}
+
+export interface Tag {
+	id: number
+	name: string
+	color: string
+	createdAt: Date
+	updatedAt: Date
+}

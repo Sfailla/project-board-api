@@ -4,9 +4,9 @@
 	"description": "backend api for project board app",
 	"main": "main.ts",
 	"scripts": {
-		"start": "node dist/main.js",
-		"start:dev": "concurrently \"npx tsc --watch\" \"nodemon -q dist/main.js\"",
-		"build": "npx tsc",
+		"start": "npx nodemon -q build/src/main.js",
+		"build:watch": "npx tsc -w -p tsconfig.json",
+		"build": "npx tsc -p tsconfig.json",
 		"lint": "npx eslint src/**/*.ts",
 		"lint:fix": "npx eslint src/**/*.ts --fix",
 		"test": "echo \"Error: no test specified\" && exit 1"

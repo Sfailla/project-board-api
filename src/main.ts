@@ -7,11 +7,12 @@ import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
 
-import { TerminalColors } from './src/types/shared'
+import { TerminalColors } from './types/shared'
 
 dotenv.config()
 
-const resolverPaths = path.join(__dirname, '/src/resolvers/*{.js,.ts}')
+const resolverPaths = path.join(__dirname, '/resolvers/*{.js,.ts}')
+export const entityPaths = path.join(__dirname, '/entities/*{.js,.ts}')
 
 const app: Application = express()
 

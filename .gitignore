@@ -3,6 +3,7 @@
 
 # BUILD FILES
 dist
+build
 
 # PACKAGES
 node_modules

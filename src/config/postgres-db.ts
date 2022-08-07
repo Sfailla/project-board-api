@@ -1,5 +1,10 @@
 import { DataSource, DataSourceOptions } from 'typeorm'
-import { entityPaths } from '../main'
+import dotenv from 'dotenv'
+import path from 'path'
+
+const entityPaths = path.join(__dirname, '../entities/*{.js,.ts}')
+
+dotenv.config()
 
 const postgresDatasourceOptions: DataSourceOptions = {
 	type: 'postgres',
@@ -13,4 +18,4 @@ const postgresDatasourceOptions: DataSourceOptions = {
 	password: process.env.DB_PASSWORD
 }
 
-export const dbConnection: DataSource = new DataSource(postgresDatasourceOptions)
+export const postgresdb: DataSource = new DataSource(postgresDatasourceOptions)

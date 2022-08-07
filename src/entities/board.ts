@@ -8,7 +8,9 @@ import {
 	Column,
 	Entity,
 	CreateDateColumn,
-	UpdateDateColumn
+	UpdateDateColumn,
+	ManyToOne,
+	ManyToMany
 } from 'typeorm'
 
 @Entity()
@@ -24,10 +26,10 @@ export class BoardEntity extends BaseEntity {
 
 	@Field(() => String)
 	@Column({ nullable: true })
-	description?: string | null
+	description?: string
 
 	@Field(() => UserEntity)
-	@Column()
+	@ManyToOne(() => UserEntity)
 	user: UserEntity
 
 	@Field(() => Date)
@@ -47,8 +49,8 @@ export class BoardEntity extends BaseEntity {
 	progress: string[]
 
 	@Field(() => [TagEntity])
-	@Column({ nullable: true })
-	tags?: TagEntity | null
+	@ManyToMany(() => TagEntity)
+	tags?: TagEntity
 
 	@Field(() => Date)
 	@CreateDateColumn()

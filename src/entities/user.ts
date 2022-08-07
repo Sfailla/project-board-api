@@ -10,11 +10,11 @@ export class UserEntity extends BaseEntity {
 
 	@Field(() => String)
 	@Column({ nullable: true })
-	firstname?: string | null
+	firstname?: string
 
 	@Field(() => String)
 	@Column({ nullable: true })
-	lastname?: string | null
+	lastname?: string
 
 	@Field(() => String)
 	@Column({ unique: true })
@@ -30,15 +30,15 @@ export class UserEntity extends BaseEntity {
 
 	@Field(() => String)
 	@Column({ nullable: true })
-	company?: string | null
+	company?: string
 
 	@Field(() => String)
 	@Column({ nullable: true })
-	position?: string | null
+	position?: string
 
-	@Field(() => Buffer)
+	@Field(() => String)
 	@Column({ nullable: true })
-	avatar?: Buffer | string | null
+	avatar?: string
 
 	@Field(() => Date)
 	@CreateDateColumn()

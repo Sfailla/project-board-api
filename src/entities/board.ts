@@ -1,3 +1,7 @@
+import { ObjectType, Field, ID } from 'type-graphql'
+import { ProjectBoardStatus } from '../types/shared'
+import { UserEntity } from './user'
+import { TagEntity } from './tag'
 import {
 	BaseEntity,
 	PrimaryGeneratedColumn,
@@ -6,31 +10,35 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn
 } from 'typeorm'
-import { User, ProjectBoardStatus, Tag } from '../types/shared'
 
 @Entity()
+@ObjectType()
 export class BoardEntity extends BaseEntity {
+	@Field(() => ID)
 	@PrimaryGeneratedColumn()
 	id: number
 
+	@Field(() => String)
 	@Column()
 	title: string
 
+	@Field(() => String)
 	@Column({ nullable: true })
 	description?: string | null
 
+	@Field(() => UserEntity)
 	@Column()
-	user: User
+	user: UserEntity
 
+	@Field(() => Date)
 	@Column()
 	startDate: Date
 
+	@Field(() => Date)
 	@Column()
 	endDate: Date
 
-	@Column()
-	color: Date
-
+	@Field(() => ProjectBoardStatus)
 	@Column({
 		type: 'enum',
 		enum: ProjectBoardStatus,
@@ -38,12 +46,15 @@ export class BoardEntity extends BaseEntity {
 	})
 	progress: string[]
 
+	@Field(() => [TagEntity])
 	@Column({ nullable: true })
-	tags?: Tag | null
+	tags?: TagEntity | null
 
+	@Field(() => Date)
 	@CreateDateColumn()
 	createdAt: Date
 
+	@Field(() => Date)
 	@UpdateDateColumn()
 	updatedAt: Date
 }

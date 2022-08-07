@@ -6,13 +6,13 @@ import path from 'path'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core'
-
 import { TerminalColors } from './types/shared'
 
 dotenv.config()
 
 const resolverPaths = path.join(__dirname, '/resolvers/*{.js,.ts}')
 export const entityPaths = path.join(__dirname, '/entities/*{.js,.ts}')
+const terminalStatus = `🚀🎉 [server]: server is running on http://localhost:${process.env.PORT}/graphql`
 
 const app: Application = express()
 
@@ -34,12 +34,7 @@ const main = async () => {
 	await server.start()
 	server.applyMiddleware({ app })
 
-	app.listen(process.env.PORT, () =>
-		console.log(
-			TerminalColors.Green,
-			`🚀🎉 [server]: server is running on http://localhost:${process.env.PORT}/graphql`
-		)
-	)
+	app.listen(process.env.PORT, () => console.log(TerminalColors.Green, terminalStatus))
 }
 
 main()

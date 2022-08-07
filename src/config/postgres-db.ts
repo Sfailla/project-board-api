@@ -1,11 +1,12 @@
 import { DataSource, DataSourceOptions } from 'typeorm'
+import { entityPaths } from '../main'
 
 const postgresDatasourceOptions: DataSourceOptions = {
 	type: 'postgres',
 	port: Number(process.env.DB_PORT),
 	database: process.env.DB_NAME,
 	host: process.env.DB_HOST,
-	entities: [],
+	entities: [entityPaths],
 	synchronize: true,
 	logging: true,
 	username: process.env.DB_USER,

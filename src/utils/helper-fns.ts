@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
 
 export const encryptPassword = async (password: string): Promise<string> => {
-	return await bcrypt.hash(password, String(process.env.SALT_ROUNDS))
+	return await bcrypt.hash(password, Number(process.env.SALT_ROUNDS))
 }
 
 export const decryptPassword = async (

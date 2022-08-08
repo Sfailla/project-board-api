@@ -24,7 +24,7 @@ export class BoardEntity extends BaseEntity {
 	@Column()
 	title: string
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })
 	description?: string
 

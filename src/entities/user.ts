@@ -1,18 +1,18 @@
 import { Field, ID, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
-@Entity()
 @ObjectType()
+@Entity()
 export class UserEntity extends BaseEntity {
 	@Field(() => ID)
 	@PrimaryGeneratedColumn()
 	id: number
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })
 	firstname?: string
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })
 	lastname?: string
 
@@ -28,15 +28,15 @@ export class UserEntity extends BaseEntity {
 	@Column()
 	password: string
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })
 	company?: string
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })
 	position?: string
 
-	@Field(() => String)
+	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })
 	avatar?: string
 

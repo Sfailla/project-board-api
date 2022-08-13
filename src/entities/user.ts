@@ -43,4 +43,8 @@ export class UserEntity extends BaseEntity {
 	@Field(() => Date)
 	@CreateDateColumn()
 	createdAt: Date
+
+	@Field(() => Date)
+	@CreateDateColumn()
+	updatedAt: Date
 }

@@ -1,3 +1,5 @@
+import { Request, Response } from 'express'
+
 export enum TerminalColors {
 	Magenta = '\x1b[35m%s\x1b[0m',
 	Cyan = '\x1b[36m%s\x1b[0m',
@@ -31,10 +33,23 @@ export interface User {
 	createdAt: Date
 }
 
+export type JwtTokenUser = Pick<User, 'id' | 'username' | 'email'>
+
 export interface Tag {
 	id: number
 	name: string
 	color: string
 	createdAt: Date
 	updatedAt: Date
+}
+
+export interface MyContext {
+	req: Request
+	res: Response
+}
+
+export interface JwtCredentials {
+	iss: string
+	aud: string
+	user: JwtTokenUser
 }

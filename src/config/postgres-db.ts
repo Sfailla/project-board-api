@@ -4,8 +4,8 @@ import path from 'path'
 import { TerminalColors } from '../types/shared'
 
 const entityPaths = path.join(__dirname, '../entities/*{.js,.ts}')
-const postgresTerminalSuccess = '✨ data source has been initialized'
-const postgresTerminalError = '🧨 error during data source initialization'
+const postgresTerminalSuccess = '[postgres]: ✨ data source has been initialized'
+const postgresTerminalError = '[postgres]: 🧨 error during data source initialization'
 
 dotenv.config()
 

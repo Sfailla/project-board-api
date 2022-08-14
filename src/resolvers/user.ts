@@ -1,8 +1,8 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
 import { UserEntity } from '../entities/user'
-import { MyContext, User } from '../types/shared'
+import { Context, User } from '../types/shared'
 import { postgresdb } from '../config/postgres-db'
-import { encryptPassword, generateAuthToken } from '../utils/helper-fns'
+import { decryptPassword, encryptPassword, generateAuthToken } from '../utils/helper-fns'
 
 @Resolver()
 export class UserResolver {
@@ -15,7 +15,7 @@ export class UserResolver {
 	}
 
 	@Query(() => UserEntity, { nullable: true, complexity: 5 })
-	async me(@Ctx() ctx: MyContext): Promise<User | undefined> {
+	async me(@Ctx() ctx: Context): Promise<User | undefined> {
 		if (!ctx.req.user.id) {
 			return undefined
 		}
@@ -36,14 +36,41 @@ export class UserResolver {
 		@Arg('email', () => String) email: string,
 		@Arg('username', () => String) username: string,
 		@Arg('password', () => String) password: string,
-		@Ctx() ctx: MyContext
+		@Ctx() ctx: Context
 	): Promise<User> {
-		const user = postgresdb.getRepository(UserEntity).create({
-			email,
-			username,
-			password: await encryptPassword(password)
-		})
-		await postgresdb.getRepository(UserEntity).save(user)
+		const user = await postgresdb
+			.getRepository(UserEntity)
+			.create({
+				email,
+				username,
+				password: await encryptPassword(password)
+			})
+			.save()
+
+		const token = generateAuthToken(user)
+		ctx.res.set('x-auth-token', token)
+
+		return user
+	}
+
+	@Mutation(() => UserEntity)
+	async login(
+		@Arg('email', () => String) email: string,
+		@Arg('password', () => String) password: string,
+		@Ctx() ctx: Context
+	): Promise<UserEntity> {
+		const user = await postgresdb.getRepository(UserEntity).findOne({ where: { email } })
+
+		if (!user) {
+			throw new Error('User not found with that email')
+		}
+
+		const isPasswordValid = await decryptPassword(password, user.password)
+
+		if (!isPasswordValid) {
+			throw new Error('Invalid password')
+		}
+
 		const token = generateAuthToken(user)
 		ctx.res.set('x-auth-token', token)
 

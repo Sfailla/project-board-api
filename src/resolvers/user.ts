@@ -1,8 +1,9 @@
-import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
+import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { User } from '../entities/user'
 import { Context } from '../types/shared'
 import { postgresdb } from '../config/postgres-db'
 import { decryptPassword, encryptPassword, generateAuthToken } from '../utils/helper-fns'
+import { isAuthenticated } from '../middleware/isAuthenticated'
 
 @Resolver()
 export class UserResolver {
@@ -14,13 +15,14 @@ export class UserResolver {
 		return user
 	}
 
+	@UseMiddleware(isAuthenticated)
 	@Query(() => User, { nullable: true, complexity: 5 })
-	async me(@Ctx() ctx: Context): Promise<User | undefined> {
-		if (!ctx.req.user.id) {
+	async me(@Ctx() { req }: Context): Promise<User | undefined> {
+		if (!req.user.id) {
 			return undefined
 		}
 
-		const user = await postgresdb.getRepository(User).findOne({ where: { id: ctx.req.user.id } })
+		const user = await postgresdb.getRepository(User).findOne({ where: { id: req.user.id } })
 
 		if (!user) {
 			return undefined
@@ -34,7 +36,7 @@ export class UserResolver {
 		@Arg('email', () => String) email: string,
 		@Arg('username', () => String) username: string,
 		@Arg('password', () => String) password: string,
-		@Ctx() ctx: Context
+		@Ctx() { res }: Context
 	): Promise<User> {
 		const user = await postgresdb
 			.getRepository(User)
@@ -46,7 +48,7 @@ export class UserResolver {
 			.save()
 
 		const token = generateAuthToken(user)
-		ctx.res.set('x-auth-token', token)
+		res.set('x-auth-token', token)
 
 		return user
 	}
@@ -55,7 +57,7 @@ export class UserResolver {
 	async login(
 		@Arg('email', () => String) email: string,
 		@Arg('password', () => String) password: string,
-		@Ctx() ctx: Context
+		@Ctx() { res }: Context
 	): Promise<User> {
 		const user = await postgresdb.getRepository(User).findOne({ where: { email } })
 
@@ -63,14 +65,16 @@ export class UserResolver {
 			throw new Error('User not found with that email')
 		}
 
-		const isPasswordValid = await decryptPassword(password, user.password)
+		const isPasswordValid = user.password && (await decryptPassword(password, user.password))
 
 		if (!isPasswordValid) {
 			throw new Error('Invalid password')
 		}
 
 		const token = generateAuthToken(user)
-		ctx.res.set('x-auth-token', token)
+		res.set('x-auth-token', token)
+
+		console.log({ token })
 
 		return user
 	}

@@ -10,7 +10,7 @@ import {
 
 @Entity()
 @ObjectType()
-export class TagEntity extends BaseEntity {
+export class Tag extends BaseEntity {
 	@Field(() => ID)
 	@PrimaryGeneratedColumn()
 	id: number

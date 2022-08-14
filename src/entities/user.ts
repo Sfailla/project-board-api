@@ -3,7 +3,7 @@ import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } 
 
 @ObjectType()
 @Entity()
-export class UserEntity extends BaseEntity {
+export class User extends BaseEntity {
 	@Field(() => ID)
 	@PrimaryGeneratedColumn()
 	id: number

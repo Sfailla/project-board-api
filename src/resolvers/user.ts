@@ -1,28 +1,26 @@
 import { Arg, Ctx, Mutation, Query, Resolver } from 'type-graphql'
-import { UserEntity } from '../entities/user'
-import { Context, User } from '../types/shared'
+import { User } from '../entities/user'
+import { Context } from '../types/shared'
 import { postgresdb } from '../config/postgres-db'
 import { decryptPassword, encryptPassword, generateAuthToken } from '../utils/helper-fns'
 
 @Resolver()
 export class UserResolver {
-	@Query(() => UserEntity)
-	async getUserByEmail(@Arg('email', () => String) email: string): Promise<UserEntity> {
-		const user = await postgresdb.getRepository(UserEntity).findOne({ where: { email } })
+	@Query(() => User)
+	async getUserByEmail(@Arg('email', () => String) email: string): Promise<User> {
+		const user = await postgresdb.getRepository(User).findOne({ where: { email } })
 
 		if (!user) throw new Error('User not found')
 		return user
 	}
 
-	@Query(() => UserEntity, { nullable: true, complexity: 5 })
+	@Query(() => User, { nullable: true, complexity: 5 })
 	async me(@Ctx() ctx: Context): Promise<User | undefined> {
 		if (!ctx.req.user.id) {
 			return undefined
 		}
 
-		const user = await postgresdb
-			.getRepository(UserEntity)
-			.findOne({ where: { id: ctx.req.user.id } })
+		const user = await postgresdb.getRepository(User).findOne({ where: { id: ctx.req.user.id } })
 
 		if (!user) {
 			return undefined
@@ -31,7 +29,7 @@ export class UserResolver {
 		return user
 	}
 
-	@Mutation(() => UserEntity)
+	@Mutation(() => User)
 	async register(
 		@Arg('email', () => String) email: string,
 		@Arg('username', () => String) username: string,
@@ -39,7 +37,7 @@ export class UserResolver {
 		@Ctx() ctx: Context
 	): Promise<User> {
 		const user = await postgresdb
-			.getRepository(UserEntity)
+			.getRepository(User)
 			.create({
 				email,
 				username,
@@ -53,13 +51,13 @@ export class UserResolver {
 		return user
 	}
 
-	@Mutation(() => UserEntity)
+	@Mutation(() => User)
 	async login(
 		@Arg('email', () => String) email: string,
 		@Arg('password', () => String) password: string,
 		@Ctx() ctx: Context
-	): Promise<UserEntity> {
-		const user = await postgresdb.getRepository(UserEntity).findOne({ where: { email } })
+	): Promise<User> {
+		const user = await postgresdb.getRepository(User).findOne({ where: { email } })
 
 		if (!user) {
 			throw new Error('User not found with that email')

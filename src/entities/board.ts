@@ -1,7 +1,7 @@
 import { ObjectType, Field, ID } from 'type-graphql'
 import { ProjectBoardStatus } from '../types/shared'
-import { UserEntity } from './user'
-import { TagEntity } from './tag'
+import { User } from './user'
+import { Tag } from './tag'
 import {
 	BaseEntity,
 	PrimaryGeneratedColumn,
@@ -15,7 +15,7 @@ import {
 
 @Entity()
 @ObjectType()
-export class BoardEntity extends BaseEntity {
+export class ProjectBoard extends BaseEntity {
 	@Field(() => ID)
 	@PrimaryGeneratedColumn()
 	id: number
@@ -28,9 +28,9 @@ export class BoardEntity extends BaseEntity {
 	@Column({ nullable: true })
 	description?: string
 
-	@Field(() => UserEntity)
-	@ManyToOne(() => UserEntity)
-	user: UserEntity
+	@Field(() => User)
+	@ManyToOne(() => User)
+	user: User
 
 	@Field(() => Date)
 	@Column()
@@ -48,9 +48,9 @@ export class BoardEntity extends BaseEntity {
 	})
 	progress: string[]
 
-	@Field(() => [TagEntity])
-	@ManyToMany(() => TagEntity)
-	tags?: TagEntity
+	@Field(() => [Tag])
+	@ManyToMany(() => Tag)
+	tags?: Tag
 
 	@Field(() => Date)
 	@CreateDateColumn()

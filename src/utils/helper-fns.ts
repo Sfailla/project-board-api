@@ -1,9 +1,10 @@
 import bcrypt from 'bcryptjs'
+import { CookieOptions, Response } from 'express'
 import { sign, verify, JwtPayload, SignOptions, Secret } from 'jsonwebtoken'
 import { JwtCredentials, JwtTokenUser } from 'src/types/shared'
 
 export const encryptPassword = async (password: string): Promise<string> => {
-	return await bcrypt.hash(password, Number(process.env.SALT_ROUNDS))
+	return await bcrypt.hash(password, Number(process.env.BCRYPT_SALT_ROUNDS))
 }
 
 export const decryptPassword = async (
@@ -29,4 +30,21 @@ export const generateAuthToken = (user: JwtTokenUser): string => {
 	}
 	const exp: SignOptions = { expiresIn: process.env.JWT_TOKEN_EXPIRATION as string }
 	return sign(credentials, process.env.JWT_TOKEN_SECRET as string, exp)
+}
+
+export const setCookie = (
+	res: Response,
+	cookieName: string,
+	cookieValue: string,
+	options?: CookieOptions
+) => {
+	const cookieOptions: CookieOptions = {
+		secure: process.env.NODE_ENV === 'production',
+		signed: true,
+		httpOnly: true,
+		maxAge: 1000 * 60 * 60 * 24 * 7,
+		domain: 'localhost'
+	}
+
+	res.cookie(cookieName, cookieValue, { ...cookieOptions, ...options })
 }

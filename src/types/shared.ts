@@ -43,7 +43,7 @@ export interface Tag {
 	updatedAt: Date
 }
 
-export interface MyContext {
+export interface Context {
 	req: Request
 	res: Response
 }

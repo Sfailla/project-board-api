@@ -1,8 +1,9 @@
 import 'reflect-metadata'
 import express, { Application, Request, Response } from 'express'
-import cors from 'cors'
+import cors, { CorsOptions } from 'cors'
 import dotenv from 'dotenv'
 import path from 'path'
+import cookieParser from 'cookie-parser'
 import { ApolloServer } from 'apollo-server-express'
 import { buildSchema } from 'type-graphql'
 import { ApolloServerPluginLandingPageGraphQLPlayground } from 'apollo-server-core/dist/plugin/landingPage/graphqlPlayground'
@@ -13,6 +14,11 @@ dotenv.config()
 
 const resolverPaths = path.join(__dirname, '/resolvers/*{.js,.ts}')
 const terminalStatus = `[server]: 🚀🚆 running on http://localhost:${process.env.PORT}/graphql`
+
+const corsOptions: CorsOptions = {
+	credentials: true,
+	origin: ['http://localhost:4000', 'http://localhost:4000/graphql', 'http://localhost:4200']
+}
 
 const app: Application = express()
 
@@ -29,12 +35,13 @@ const main = async () => {
 
 	app.use(express.json())
 	app.use(express.urlencoded({ extended: true }))
-	app.use(cors())
+	app.use(cookieParser(process.env.COOKIE_SECRET as string))
+	app.use(cors(corsOptions))
 
 	initializePostgresDatabase()
 
 	await server.start()
-	server.applyMiddleware({ app })
+	server.applyMiddleware({ app, cors: corsOptions })
 
 	app.listen(process.env.PORT, () => console.log(TerminalColors.Green, terminalStatus))
 }

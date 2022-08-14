@@ -2,7 +2,7 @@ import { Arg, Ctx, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql
 import { User } from '../entities/user'
 import { Context } from '../types/shared'
 import { postgresdb } from '../config/postgres-db'
-import { decryptPassword, encryptPassword, generateAuthToken } from '../utils/helper-fns'
+import { decryptPassword, encryptPassword, generateAuthToken, setCookie } from '../utils/helper-fns'
 import { isAuthenticated } from '../middleware/isAuthenticated'
 
 @Resolver()
@@ -49,6 +49,7 @@ export class UserResolver {
 
 		const token = generateAuthToken(user)
 		res.set('x-auth-token', token)
+		setCookie(res, 'x-auth-token', token)
 
 		return user
 	}
@@ -73,6 +74,7 @@ export class UserResolver {
 
 		const token = generateAuthToken(user)
 		res.set('x-auth-token', token)
+		setCookie(res, 'x-auth-token', token)
 
 		console.log({ token })
 

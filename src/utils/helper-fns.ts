@@ -27,6 +27,6 @@ export const generateAuthToken = (user: JwtTokenUser): string => {
 			email: user.email
 		}
 	}
-	const exp: SignOptions = { expiresIn: process.env.JWT_TOKEN_EXP as string }
+	const exp: SignOptions = { expiresIn: process.env.JWT_TOKEN_EXPIRATION as string }
 	return sign(credentials, process.env.JWT_TOKEN_SECRET as string, exp)
 }

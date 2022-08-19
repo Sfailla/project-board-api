@@ -41,6 +41,7 @@ export const setCookie = (
 	const cookieOptions: CookieOptions = {
 		secure: process.env.NODE_ENV === 'production',
 		signed: true,
+		sameSite: 'lax',
 		httpOnly: true,
 		maxAge: 1000 * 60 * 60 * 24 * 7,
 		domain: 'localhost'

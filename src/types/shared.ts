@@ -26,7 +26,7 @@ export interface User {
 	lastname?: string | null
 	username: string
 	email: string
-	password: string
+	password?: string
 	company?: string | null
 	position?: string | null
 	avatar?: Buffer | string | null

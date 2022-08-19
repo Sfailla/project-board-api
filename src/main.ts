@@ -41,7 +41,11 @@ const main = async () => {
 	initializePostgresDatabase()
 
 	await server.start()
-	server.applyMiddleware({ app, cors: corsOptions })
+	server.applyMiddleware({
+		app,
+		cors: corsOptions,
+		bodyParserConfig: { limit: '5mb' }
+	})
 
 	app.listen(process.env.PORT, () => console.log(TerminalColors.Green, terminalStatus))
 }

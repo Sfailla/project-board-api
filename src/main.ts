@@ -34,18 +34,14 @@ const main = async () => {
 	})
 
 	app.use(express.json())
-	app.use(express.urlencoded({ extended: true }))
+	app.use(express.urlencoded({ extended: true, limit: '5mb' }))
 	app.use(cookieParser(process.env.COOKIE_SECRET as string))
 	app.use(cors(corsOptions))
 
 	initializePostgresDatabase()
 
 	await server.start()
-	server.applyMiddleware({
-		app,
-		cors: corsOptions,
-		bodyParserConfig: { limit: '5mb' }
-	})
+	server.applyMiddleware({ app, cors: corsOptions })
 
 	app.listen(process.env.PORT, () => console.log(TerminalColors.Green, terminalStatus))
 }

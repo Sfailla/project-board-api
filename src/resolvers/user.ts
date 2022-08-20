@@ -98,9 +98,9 @@ export class UserResolver {
 
 	@Mutation(() => NullUser)
 	logout(@Ctx() { res, req }: Context): NullUser {
-		const user = { user: null }
+		const user = null
 		res.clearCookie('x-auth-token', { maxAge: 0 })
 		req.user = null
-		return user
+		return { user }
 	}
 }

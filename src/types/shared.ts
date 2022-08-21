@@ -33,6 +33,8 @@ export interface User {
 	createdAt: Date
 }
 
+export type UserId = Pick<User, 'id'>
+
 export type JwtTokenUser = Pick<User, 'id' | 'username' | 'email'>
 
 export interface Tag {

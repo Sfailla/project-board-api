@@ -45,4 +45,41 @@ export class ProjectResolver {
 
 		return project
 	}
+
+	@UseMiddleware(isAuthenticated)
+	@Mutation(() => Project)
+	async updateProject(
+		@Arg('id', () => ID) id: number,
+		@Arg('name', () => String) name: string,
+		@Arg('description', () => String, { nullable: true }) description: string,
+		@Ctx() { req }: Context
+	): Promise<Project> {
+		const project = await postgresdb
+			.getRepository(Project)
+			.findOne({ where: { id, userId: req.user?.id as Partial<User> }, relations: ['user'] })
+
+		if (!project) throw new Error('Project not found with that id')
+
+		const updatedProject = {
+			...project,
+			name,
+			description
+		}
+
+		return await postgresdb.getRepository(Project).save(updatedProject)
+	}
+
+	@UseMiddleware(isAuthenticated)
+	@Mutation(() => Boolean)
+	async deleteProject(@Arg('id', () => ID) id: number, @Ctx() { req }: Context): Promise<boolean> {
+		const project = await postgresdb
+			.getRepository(Project)
+			.findOne({ where: { id, userId: req.user?.id as Partial<User> } })
+
+		if (!project) throw new Error('Project not found with that id')
+
+		await postgresdb.getRepository(Project).delete({ id })
+
+		return true
+	}
 }

@@ -1,3 +1,4 @@
+import { UserId } from '../types/shared'
 import { ObjectType, Field, ID } from 'type-graphql'
 import {
 	BaseEntity,
@@ -18,11 +19,15 @@ export class Project extends BaseEntity {
 	id: number
 
 	@Field(() => User)
-	@ManyToOne(() => User)
+	@ManyToOne(() => User, user => user.id)
 	user: User
 
-	@Field(() => String)
+	@Field(() => ID)
 	@Column()
+	userId: UserId
+
+	@Field(() => String)
+	@Column({ unique: true })
 	name: string
 
 	@Field(() => String, { nullable: true })

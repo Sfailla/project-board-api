@@ -26,7 +26,7 @@ export class User extends BaseEntity {
 
 	@Field(() => String)
 	@Column()
-	password?: string
+	password: string
 
 	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })
@@ -42,9 +42,9 @@ export class User extends BaseEntity {
 
 	@Field(() => Date)
 	@CreateDateColumn()
-	createdAt?: Date
+	createdAt: Date
 
 	@Field(() => Date)
 	@CreateDateColumn()
-	updatedAt?: Date
+	updatedAt: Date
 }

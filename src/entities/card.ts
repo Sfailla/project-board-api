@@ -1,6 +1,5 @@
-import { ObjectType, Field, ID } from 'type-graphql'
+import { ObjectType, Field, ID, registerEnumType } from 'type-graphql'
 import { ProjectBoardStatus } from '../types/shared'
-import { User } from './user'
 import { Tag } from './tag'
 import {
 	BaseEntity,
@@ -10,9 +9,17 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	ManyToOne,
-	ManyToMany
+	ManyToMany,
+	JoinTable,
+	JoinColumn
 } from 'typeorm'
 import { Project } from './project'
+import { User } from './user'
+
+registerEnumType(ProjectBoardStatus, {
+	name: 'ProjectBoardStatus',
+	description: 'The status of the task described on project board'
+})
 
 @Entity()
 @ObjectType()
@@ -25,6 +32,18 @@ export class Card extends BaseEntity {
 	@ManyToOne(() => Project, project => project.id)
 	project: Project
 
+	@Field(() => ID)
+	@Column()
+	projectId: number
+
+	@Field(() => User)
+	@ManyToOne(() => User, user => user.id)
+	user: User
+
+	@Field(() => ID)
+	@Column()
+	userId: number
+
 	@Field(() => String)
 	@Column()
 	title: string
@@ -33,16 +52,16 @@ export class Card extends BaseEntity {
 	@Column({ nullable: true })
 	description?: string
 
-	@Field(() => [User])
-	@ManyToMany(() => User, user => user.email)
-	asignee: User[]
+	@Field(() => String, { nullable: true })
+	@Column({ nullable: true })
+	asignee?: string
 
-	@Field(() => Date)
-	@Column()
+	@Field(() => Date, { nullable: true })
+	@Column({ nullable: true })
 	startDate: Date
 
-	@Field(() => Date)
-	@Column()
+	@Field(() => Date, { nullable: true })
+	@Column({ nullable: true })
 	endDate: Date
 
 	@Field(() => ProjectBoardStatus, { defaultValue: ProjectBoardStatus.Open })
@@ -51,11 +70,12 @@ export class Card extends BaseEntity {
 		enum: ProjectBoardStatus,
 		default: ProjectBoardStatus.Open
 	})
-	status: string[]
+	status: ProjectBoardStatus
 
 	@Field(() => [Tag])
 	@ManyToMany(() => Tag)
-	tags?: Tag
+	@JoinTable()
+	tags: Tag[]
 
 	@Field(() => Date)
 	@CreateDateColumn()

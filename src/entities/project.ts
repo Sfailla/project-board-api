@@ -24,7 +24,7 @@ export class Project extends BaseEntity {
 
 	@Field(() => ID)
 	@Column()
-	userId: UserId
+	userId: number
 
 	@Field(() => String)
 	@Column({ unique: true })

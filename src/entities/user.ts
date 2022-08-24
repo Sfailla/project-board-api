@@ -16,6 +16,11 @@ export class User extends BaseEntity {
 	@Column({ nullable: true })
 	lastname?: string
 
+	@Field(() => String, { nullable: true })
+	get fullname(): string {
+		return `${this.firstname} ${this.lastname}`
+	}
+
 	@Field(() => String)
 	@Column({ unique: true })
 	username: string

@@ -5,8 +5,10 @@ import {
 	PrimaryGeneratedColumn,
 	UpdateDateColumn,
 	Column,
-	Entity
+	Entity,
+	ManyToMany
 } from 'typeorm'
+import { Card } from './card'
 
 @Entity()
 @ObjectType()
@@ -22,6 +24,10 @@ export class Tag extends BaseEntity {
 	@Field(() => String)
 	@Column()
 	color: string
+
+	@Field(() => [Card], { nullable: true })
+	@ManyToMany(() => Card, card => card.tags, { nullable: true })
+	cards: Card[] | null
 
 	@Field(() => Date)
 	@CreateDateColumn()

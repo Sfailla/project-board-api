@@ -74,7 +74,6 @@ export class Card extends BaseEntity {
 
 	@Field(() => [Tag])
 	@ManyToMany(() => Tag)
-	@JoinTable()
 	tags: Tag[]
 
 	@Field(() => Date)

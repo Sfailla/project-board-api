@@ -1,4 +1,3 @@
-import { User } from '../entities/user'
 import { isAuthenticated } from '../middleware/isAuthenticated'
 import { Arg, Ctx, ID, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { postgresdb } from '../config/postgres-db'
@@ -10,11 +9,10 @@ export class ProjectResolver {
 	@UseMiddleware(isAuthenticated)
 	@Query(() => [Project])
 	async getProjects(@Ctx() { req }: Context): Promise<Project[]> {
-		const projects = await postgresdb.getRepository(Project).find({
-			where: { userId: req.user?.id as Partial<User> },
+		return await postgresdb.getRepository(Project).find({
+			where: { userId: req.user?.id },
 			relations: ['user']
 		})
-		return projects
 	}
 
 	@UseMiddleware(isAuthenticated)
@@ -22,7 +20,7 @@ export class ProjectResolver {
 	async getProjectById(@Arg('id', () => ID) id: number, @Ctx() { req }: Context): Promise<Project> {
 		const project = await postgresdb
 			.getRepository(Project)
-			.findOne({ where: { id, userId: req.user?.id as Partial<User> }, relations: ['user'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user'] })
 
 		if (!project) throw new Error('Project not found with that id')
 
@@ -36,14 +34,10 @@ export class ProjectResolver {
 		@Arg('description', () => String, { nullable: true }) description: string,
 		@Ctx() { req }: Context
 	): Promise<Project> {
-		const userId = req.user?.id as Partial<User>
-
-		const project = await postgresdb
+		return await postgresdb
 			.getRepository(Project)
-			.create({ name, description, userId })
+			.create({ name, description, userId: req.user?.id })
 			.save()
-
-		return project
 	}
 
 	@UseMiddleware(isAuthenticated)
@@ -56,7 +50,7 @@ export class ProjectResolver {
 	): Promise<Project> {
 		const project = await postgresdb
 			.getRepository(Project)
-			.findOne({ where: { id, userId: req.user?.id as Partial<User> }, relations: ['user'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user'] })
 
 		if (!project) throw new Error('Project not found with that id')
 
@@ -66,6 +60,7 @@ export class ProjectResolver {
 			description
 		}
 
+		// update and return the saved project by id
 		return await postgresdb.getRepository(Project).save(updatedProject)
 	}
 
@@ -74,10 +69,11 @@ export class ProjectResolver {
 	async deleteProject(@Arg('id', () => ID) id: number, @Ctx() { req }: Context): Promise<boolean> {
 		const project = await postgresdb
 			.getRepository(Project)
-			.findOne({ where: { id, userId: req.user?.id as Partial<User> } })
+			.findOne({ where: { id, userId: req.user?.id } })
 
 		if (!project) throw new Error('Project not found with that id')
 
+		// assign to a variable to see what is returned after a delete is performed
 		await postgresdb.getRepository(Project).delete({ id })
 
 		return true

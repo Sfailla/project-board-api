@@ -1,4 +1,14 @@
-import { Arg, Ctx, Field, Mutation, ObjectType, Query, Resolver, UseMiddleware } from 'type-graphql'
+import {
+	Arg,
+	Ctx,
+	Field,
+	InputType,
+	Mutation,
+	ObjectType,
+	Query,
+	Resolver,
+	UseMiddleware
+} from 'type-graphql'
 import { User } from '../entities/user'
 import { Context } from '../types/shared'
 import { postgresdb } from '../config/postgres-db'
@@ -18,6 +28,30 @@ export class UserWithToken {
 
 	@Field(() => String)
 	token: string
+}
+
+@InputType()
+export class UserInput {
+	@Field()
+	username?: string
+
+	@Field()
+	email?: string
+
+	@Field()
+	firstname?: string
+
+	@Field()
+	lastname?: string
+
+	@Field()
+	company?: string
+
+	@Field()
+	position?: string
+
+	@Field()
+	avatar?: string
 }
 
 @Resolver()
@@ -47,7 +81,7 @@ export class UserResolver {
 	}
 
 	@Mutation(() => UserWithToken)
-	async register(
+	async createUser(
 		@Arg('email', () => String) email: string,
 		@Arg('username', () => String) username: string,
 		@Arg('password', () => String) password: string,
@@ -99,8 +133,32 @@ export class UserResolver {
 	@Mutation(() => NullUser)
 	logout(@Ctx() { res, req }: Context): NullUser {
 		const user = null
+		req.user = user
 		res.clearCookie('x-auth-token', { maxAge: 0 })
-		req.user = null
 		return { user }
+	}
+
+	@UseMiddleware(isAuthenticated)
+	@Mutation(() => User)
+	async updateUser(
+		@Arg('input') { username, email, firstname, lastname, company, position, avatar }: UserInput,
+		@Ctx() { req }: Context
+	): Promise<User> {
+		const user = await postgresdb.getRepository(User).findOne({ where: { id: req.user?.id } })
+
+		if (!user) {
+			throw new Error('User not found')
+		}
+
+		return await postgresdb.getRepository(User).save({
+			...user,
+			username,
+			email,
+			firstname,
+			lastname,
+			company,
+			position,
+			avatar
+		})
 	}
 }

@@ -21,7 +21,7 @@ export enum ProjectBoardStatus {
 }
 
 export interface User {
-	id: number
+	id: string
 	firstname?: string | null
 	lastname?: string | null
 	username: string
@@ -38,7 +38,7 @@ export type UserId = Pick<User, 'id'>
 export type JwtTokenUser = Pick<User, 'id' | 'username' | 'email'>
 
 export interface Tag {
-	id: number
+	id: string
 	name: string
 	color: string
 	createdAt: Date

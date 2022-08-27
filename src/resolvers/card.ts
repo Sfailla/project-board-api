@@ -11,16 +11,16 @@ export class CardResolver {
 	async getCards(@Ctx() { req }: Context): Promise<Card[]> {
 		return await postgresdb.getRepository(Card).find({
 			where: { userId: req.user?.id },
-			relations: ['user', 'tags']
+			relations: ['user', 'tag']
 		})
 	}
 
 	@UseMiddleware(isAuthenticated)
 	@Query(() => Card)
-	async getCardById(@Arg('id', () => ID) id: number, @Ctx() { req }: Context): Promise<Card> {
+	async getCardById(@Arg('id', () => ID) id: string, @Ctx() { req }: Context): Promise<Card> {
 		const card = await postgresdb
 			.getRepository(Card)
-			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tags'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tag'] })
 
 		if (!card) throw new Error('Card not found with that id')
 
@@ -32,35 +32,41 @@ export class CardResolver {
 	async createCard(
 		@Arg('title') title: string,
 		@Arg('description') description: string,
-		@Arg('projectId') projectId: number,
+		@Arg('projectId') projectId: string,
 		@Ctx() { req }: Context
 	): Promise<Card> {
-		return await postgresdb
+		const { id } = await postgresdb
 			.getRepository(Card)
 			.create({ title, description, projectId, userId: req.user?.id })
 			.save()
+
+		const card = await postgresdb
+			.getRepository(Card)
+			.findOne({ where: { id }, relations: ['user', 'tag'] })
+
+		if (!card) throw new Error('Card not found with that id')
+
+		return card
 	}
 
 	@UseMiddleware(isAuthenticated)
 	@Mutation(() => Card)
 	async updateCard(
-		@Arg('id', () => ID) id: number,
+		@Arg('id', () => ID) id: string,
 		@Arg('title') title: string,
 		@Arg('description') description: string,
-		@Arg('projectId') projectId: number,
 		@Ctx() { req }: Context
 	): Promise<Card> {
 		const card = await postgresdb
 			.getRepository(Card)
-			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tags'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tag'] })
 
 		if (!card) throw new Error('Card not found with that id')
 
 		const updatedCard = {
 			...card,
 			title,
-			description,
-			projectId
+			description
 		}
 
 		return await postgresdb.getRepository(Card).save(updatedCard)
@@ -68,10 +74,10 @@ export class CardResolver {
 
 	@UseMiddleware(isAuthenticated)
 	@Mutation(() => Card)
-	async deleteCard(@Arg('id', () => ID) id: number, @Ctx() { req }: Context): Promise<Card> {
+	async deleteCard(@Arg('id', () => ID) id: string, @Ctx() { req }: Context): Promise<Card> {
 		const card = await postgresdb
 			.getRepository(Card)
-			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tags'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tag'] })
 
 		if (!card) throw new Error('Card not found with that id')
 

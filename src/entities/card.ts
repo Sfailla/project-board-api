@@ -9,9 +9,7 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	ManyToOne,
-	ManyToMany,
-	JoinTable,
-	JoinColumn
+	ManyToMany
 } from 'typeorm'
 import { Project } from './project'
 import { User } from './user'
@@ -25,8 +23,8 @@ registerEnumType(ProjectBoardStatus, {
 @ObjectType()
 export class Card extends BaseEntity {
 	@Field(() => ID)
-	@PrimaryGeneratedColumn()
-	id: number
+	@PrimaryGeneratedColumn('uuid')
+	id: string
 
 	@Field(() => Project)
 	@ManyToOne(() => Project, project => project.id)
@@ -34,7 +32,7 @@ export class Card extends BaseEntity {
 
 	@Field(() => ID)
 	@Column()
-	projectId: number
+	projectId: string
 
 	@Field(() => User)
 	@ManyToOne(() => User, user => user.id)
@@ -42,7 +40,7 @@ export class Card extends BaseEntity {
 
 	@Field(() => ID)
 	@Column()
-	userId: number
+	userId: string
 
 	@Field(() => String)
 	@Column()

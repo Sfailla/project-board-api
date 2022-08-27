@@ -14,8 +14,8 @@ import { Card } from './card'
 @ObjectType()
 export class Tag extends BaseEntity {
 	@Field(() => ID)
-	@PrimaryGeneratedColumn()
-	id: number
+	@PrimaryGeneratedColumn('uuid')
+	id: string
 
 	@Field(() => String)
 	@Column({ unique: true })

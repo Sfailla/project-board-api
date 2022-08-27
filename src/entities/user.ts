@@ -5,8 +5,8 @@ import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } 
 @Entity()
 export class User extends BaseEntity {
 	@Field(() => ID)
-	@PrimaryGeneratedColumn()
-	id: number
+	@PrimaryGeneratedColumn('uuid')
+	id: string
 
 	@Field(() => String, { nullable: true })
 	@Column({ nullable: true })

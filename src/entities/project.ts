@@ -15,8 +15,8 @@ import { User } from './user'
 @ObjectType()
 export class Project extends BaseEntity {
 	@Field(() => ID)
-	@PrimaryGeneratedColumn()
-	id: number
+	@PrimaryGeneratedColumn('uuid')
+	id: string
 
 	@Field(() => User)
 	@ManyToOne(() => User, user => user.id)
@@ -24,7 +24,7 @@ export class Project extends BaseEntity {
 
 	@Field(() => ID)
 	@Column()
-	userId: number
+	userId: string
 
 	@Field(() => String)
 	@Column({ unique: true })

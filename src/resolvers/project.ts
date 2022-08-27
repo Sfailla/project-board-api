@@ -17,7 +17,7 @@ export class ProjectResolver {
 
 	@UseMiddleware(isAuthenticated)
 	@Query(() => Project)
-	async getProjectById(@Arg('id', () => ID) id: number, @Ctx() { req }: Context): Promise<Project> {
+	async getProjectById(@Arg('id', () => ID) id: string, @Ctx() { req }: Context): Promise<Project> {
 		const project = await postgresdb
 			.getRepository(Project)
 			.findOne({ where: { id, userId: req.user?.id }, relations: ['user'] })
@@ -43,7 +43,7 @@ export class ProjectResolver {
 	@UseMiddleware(isAuthenticated)
 	@Mutation(() => Project)
 	async updateProject(
-		@Arg('id', () => ID) id: number,
+		@Arg('id', () => ID) id: string,
 		@Arg('name', () => String) name: string,
 		@Arg('description', () => String, { nullable: true }) description: string,
 		@Ctx() { req }: Context
@@ -66,7 +66,7 @@ export class ProjectResolver {
 
 	@UseMiddleware(isAuthenticated)
 	@Mutation(() => Boolean)
-	async deleteProject(@Arg('id', () => ID) id: number, @Ctx() { req }: Context): Promise<boolean> {
+	async deleteProject(@Arg('id', () => ID) id: string, @Ctx() { req }: Context): Promise<boolean> {
 		const project = await postgresdb
 			.getRepository(Project)
 			.findOne({ where: { id, userId: req.user?.id } })

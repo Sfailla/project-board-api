@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from 'type-graphql'
+import { Field, ID, InputType, ObjectType } from 'type-graphql'
 import { BaseEntity, Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm'
 
 @ObjectType()
@@ -52,4 +52,28 @@ export class User extends BaseEntity {
 	@Field(() => Date)
 	@CreateDateColumn()
 	updatedAt: Date
+}
+
+@InputType()
+export class UserInput {
+	@Field(() => String, { nullable: true })
+	username?: string
+
+	@Field(() => String, { nullable: true })
+	email?: string
+
+	@Field(() => String, { nullable: true })
+	firstname?: string
+
+	@Field(() => String, { nullable: true })
+	lastname?: string
+
+	@Field(() => String, { nullable: true })
+	company?: string
+
+	@Field(() => String, { nullable: true })
+	position?: string
+
+	@Field(() => String, { nullable: true })
+	avatar?: string
 }

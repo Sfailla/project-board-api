@@ -3,16 +3,18 @@ import { Card } from '../entities/card'
 import { Arg, Ctx, ID, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { Context } from '../types/shared'
 import { isAuthenticated } from '../middleware/isAuthenticated'
+import { Tag } from '../entities/tag'
 
 @Resolver()
 export class CardResolver {
 	@UseMiddleware(isAuthenticated)
 	@Query(() => [Card])
 	async getCards(@Ctx() { req }: Context): Promise<Card[]> {
-		return await postgresdb.getRepository(Card).find({
-			where: { userId: req.user?.id },
-			relations: ['user', 'tag']
-		})
+		const cards = await postgresdb
+			.getRepository(Card)
+			.find({ where: { userId: req.user?.id }, relations: ['user', 'tags'] })
+
+		return cards
 	}
 
 	@UseMiddleware(isAuthenticated)
@@ -20,7 +22,7 @@ export class CardResolver {
 	async getCardById(@Arg('id', () => ID) id: string, @Ctx() { req }: Context): Promise<Card> {
 		const card = await postgresdb
 			.getRepository(Card)
-			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tag'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tags'] })
 
 		if (!card) throw new Error('Card not found with that id')
 
@@ -37,12 +39,12 @@ export class CardResolver {
 	): Promise<Card> {
 		const { id } = await postgresdb
 			.getRepository(Card)
-			.create({ title, description, projectId, userId: req.user?.id })
+			.create({ userId: req.user?.id, title, description, projectId })
 			.save()
 
 		const card = await postgresdb
 			.getRepository(Card)
-			.findOne({ where: { id }, relations: ['user', 'tag'] })
+			.findOne({ where: { id }, relations: ['user', 'tags'] })
 
 		if (!card) throw new Error('Card not found with that id')
 
@@ -59,7 +61,7 @@ export class CardResolver {
 	): Promise<Card> {
 		const card = await postgresdb
 			.getRepository(Card)
-			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tag'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tags'] })
 
 		if (!card) throw new Error('Card not found with that id')
 
@@ -77,7 +79,7 @@ export class CardResolver {
 	async deleteCard(@Arg('id', () => ID) id: string, @Ctx() { req }: Context): Promise<Card> {
 		const card = await postgresdb
 			.getRepository(Card)
-			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tag'] })
+			.findOne({ where: { id, userId: req.user?.id }, relations: ['user', 'tags'] })
 
 		if (!card) throw new Error('Card not found with that id')
 

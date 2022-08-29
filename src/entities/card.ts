@@ -9,7 +9,9 @@ import {
 	CreateDateColumn,
 	UpdateDateColumn,
 	ManyToOne,
-	ManyToMany
+	ManyToMany,
+	JoinTable,
+	JoinColumn
 } from 'typeorm'
 import { Project } from './project'
 import { User } from './user'
@@ -72,6 +74,7 @@ export class Card extends BaseEntity {
 
 	@Field(() => [Tag])
 	@ManyToMany(() => Tag)
+	@JoinTable({ name: 'card_tags' })
 	tags: Tag[]
 
 	@Field(() => Date)

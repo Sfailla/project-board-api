@@ -9,6 +9,7 @@ import {
 	ManyToMany
 } from 'typeorm'
 import { Card } from './card'
+import { User } from './user'
 
 @Entity()
 @ObjectType()
@@ -25,9 +26,13 @@ export class Tag extends BaseEntity {
 	@Column()
 	color: string
 
-	@Field(() => [Card], { nullable: true })
-	@ManyToMany(() => Card, card => card.tags, { nullable: true })
-	cards: Card[] | null
+	@Field(() => [Card])
+	@ManyToMany(() => Card, card => card.tags)
+	cards: Card[]
+
+	@Field(() => ID)
+	@Column()
+	cardId: string
 
 	@Field(() => Date)
 	@CreateDateColumn()

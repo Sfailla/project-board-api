@@ -19,7 +19,7 @@ registerEnumType(ProjectBoardStatus, {
 
 @Entity()
 @ObjectType()
-export class Card extends BaseEntity {
+export class Task extends BaseEntity {
 	@Field(() => ID)
 	@PrimaryGeneratedColumn('uuid')
 	id: string
@@ -82,7 +82,7 @@ export class Card extends BaseEntity {
 }
 
 @InputType()
-export class CardInput {
+export class TaskInput {
 	@Field(() => ID, { nullable: true })
 	id?: string
 

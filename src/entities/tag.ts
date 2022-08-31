@@ -6,9 +6,8 @@ import {
 	UpdateDateColumn,
 	Column,
 	Entity,
-	ManyToMany
+	ManyToOne
 } from 'typeorm'
-import { Card } from './card'
 import { User } from './user'
 
 @Entity()
@@ -26,13 +25,13 @@ export class Tag extends BaseEntity {
 	@Column()
 	color: string
 
-	@Field(() => [Card])
-	@ManyToMany(() => Card, card => card.tags)
-	cards: Card[]
+	@Field(() => [User], { nullable: true })
+	@ManyToOne(() => User, user => user.id)
+	user?: User[]
 
-	@Field(() => ID)
-	@Column()
-	cardId: string
+	@Field(() => ID, { nullable: true })
+	@Column({ nullable: true })
+	userId?: string
 
 	@Field(() => Date)
 	@CreateDateColumn()

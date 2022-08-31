@@ -1,6 +1,5 @@
 import { ObjectType, Field, ID, registerEnumType } from 'type-graphql'
 import { ProjectBoardStatus } from '../types/shared'
-import { Tag } from './tag'
 import {
 	BaseEntity,
 	PrimaryGeneratedColumn,
@@ -8,10 +7,7 @@ import {
 	Entity,
 	CreateDateColumn,
 	UpdateDateColumn,
-	ManyToOne,
-	ManyToMany,
-	JoinTable,
-	JoinColumn
+	ManyToOne
 } from 'typeorm'
 import { Project } from './project'
 import { User } from './user'
@@ -72,10 +68,9 @@ export class Card extends BaseEntity {
 	})
 	status: ProjectBoardStatus
 
-	@Field(() => [Tag])
-	@ManyToMany(() => Tag)
-	@JoinTable({ name: 'card_tags' })
-	tags: Tag[]
+	@Field(() => String, { nullable: true })
+	@Column({ nullable: true })
+	tagName: string
 
 	@Field(() => Date)
 	@CreateDateColumn()

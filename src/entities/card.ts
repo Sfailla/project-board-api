@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, registerEnumType } from 'type-graphql'
+import { ObjectType, Field, ID, registerEnumType, InputType } from 'type-graphql'
 import { ProjectBoardStatus } from '../types/shared'
 import {
 	BaseEntity,
@@ -79,4 +79,25 @@ export class Card extends BaseEntity {
 	@Field(() => Date)
 	@UpdateDateColumn()
 	updatedAt: Date
+}
+
+@InputType()
+export class CardInput {
+	@Field(() => ID, { nullable: true })
+	id?: string
+
+	@Field(() => String)
+	title: string
+
+	@Field(() => String, { nullable: true })
+	description?: string
+
+	@Field(() => String, { nullable: true })
+	asignee?: string
+
+	@Field(() => ID)
+	projectId: string
+
+	@Field(() => String, { nullable: true })
+	tagName?: string
 }

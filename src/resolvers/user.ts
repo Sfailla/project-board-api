@@ -106,13 +106,13 @@ export class UserResolver {
 
 	@UseMiddleware(isAuthenticated)
 	@Mutation(() => User)
-	async updateUser(@Arg('input') input: UserInput, @Ctx() { req }: Context): Promise<User> {
+	async updateUser(@Arg('input') userInput: UserInput, @Ctx() { req }: Context): Promise<User> {
 		const user = await postgresdb.getRepository(User).findOne({ where: { id: req.user?.id } })
 
 		if (!user) {
 			throw new Error('User not found')
 		}
 
-		return await postgresdb.getRepository(User).save({ ...user, ...input })
+		return await postgresdb.getRepository(User).save({ ...user, ...userInput })
 	}
 }

@@ -1,5 +1,5 @@
 import { postgresdb } from '../config/postgres-db'
-import { Card } from '../entities/card'
+import { Card, CardInput } from '../entities/card'
 import { Arg, Ctx, ID, Mutation, Query, Resolver, UseMiddleware } from 'type-graphql'
 import { Context } from '../types/shared'
 import { isAuthenticated } from '../middleware/isAuthenticated'
@@ -30,19 +30,12 @@ export class CardResolver {
 
 	@UseMiddleware(isAuthenticated)
 	@Mutation(() => Card)
-	async createCard(
-		@Arg('title') title: string,
-		@Arg('description') description: string,
-		@Arg('projectId') projectId: string,
-		@Ctx() { req }: Context
-	): Promise<Card> {
+	async createCard(@Arg('input') cardInput: CardInput, @Ctx() { req }: Context): Promise<Card> {
 		const card = await postgresdb
 			.getRepository(Card)
 			.create({
-				userId: req.user?.id,
-				title,
-				description,
-				projectId
+				...cardInput,
+				userId: req.user?.id
 			})
 			.save()
 

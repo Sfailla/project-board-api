@@ -4,7 +4,7 @@ import path from 'path'
 import { TerminalColors } from '../types/shared'
 
 const entityPaths = path.join(__dirname, '../entities/*{.js,.ts}')
-const postgresTerminalSuccess = '[postgres]: ✨ data source has been initialized'
+const postgresTerminalSuccess = '[postgres]: 🚀 ✨ data source has been initialized'
 const postgresTerminalError = '[postgres]: 🧨 error during data source initialization'
 
 dotenv.config()
@@ -26,7 +26,7 @@ export const postgresdb: DataSource = new DataSource(postgresDatasourceOptions)
 export const initializePostgresDatabase = async () => {
 	try {
 		await postgresdb.initialize()
-		console.log(TerminalColors.Green, postgresTerminalSuccess)
+		console.log(TerminalColors.Magenta, postgresTerminalSuccess)
 	} catch (error) {
 		console.log(TerminalColors.Red, postgresTerminalError)
 		console.log(TerminalColors.Red, error)

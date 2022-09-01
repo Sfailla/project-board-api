@@ -13,7 +13,7 @@ import { initializePostgresDatabase } from './config/postgres-db'
 dotenv.config()
 
 const resolverPaths = path.join(__dirname, '/resolvers/*{.js,.ts}')
-const terminalStatus = `[server]: 🚀🚆 running on http://localhost:${process.env.PORT}/graphql`
+const terminalStatus = `[server]:🌏 running on http://localhost:${process.env.PORT}/graphql`
 
 const corsOptions: CorsOptions = {
 	credentials: true,

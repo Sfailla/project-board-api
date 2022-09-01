@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from 'type-graphql'
+import { Field, ID, InputType, ObjectType } from 'type-graphql'
 import {
 	BaseEntity,
 	CreateDateColumn,
@@ -40,4 +40,16 @@ export class Tag extends BaseEntity {
 	@Field(() => Date)
 	@UpdateDateColumn()
 	updatedAt: Date
+}
+
+@InputType()
+export class TagInput {
+	@Field(() => ID, { nullable: true })
+	id?: string
+
+	@Field(() => String, { nullable: true })
+	name?: string
+
+	@Field(() => String, { nullable: true })
+	color?: string
 }

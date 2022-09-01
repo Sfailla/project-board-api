@@ -1,8 +1,11 @@
-import { MiddlewareFn } from 'type-graphql'
+import { MiddlewareFn, NextFn } from 'type-graphql'
 import { verify } from 'jsonwebtoken'
 import { Context, JwtTokenUser } from '../types/shared'
 
-export const isAuthenticated: MiddlewareFn<Context> = ({ context: { req } }, next) => {
+export const isAuthenticated: MiddlewareFn<Context> = (
+	{ context: { req } },
+	next
+): Promise<void | NextFn | Error> => {
 	const token = req.headers['x-auth-token'] as string
 	const cookieToken = req.signedCookies['x-auth-token'] as string
 

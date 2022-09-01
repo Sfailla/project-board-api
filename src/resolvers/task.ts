@@ -8,10 +8,13 @@ import { isAuthenticated } from '../middleware/isAuthenticated'
 export class TaskResolver {
 	@UseMiddleware(isAuthenticated)
 	@Query(() => [Task])
-	async getTasks(@Ctx() { req }: Context): Promise<Task[]> {
+	async getTasks(
+		@Arg('projectId', () => ID) projectId: string,
+		@Ctx() { req }: Context
+	): Promise<Task[]> {
 		const tasks = await postgresdb
 			.getRepository(Task)
-			.find({ where: { userId: req.user?.id }, relations: ['user'] })
+			.find({ where: { userId: req.user?.id, projectId }, relations: ['user'] })
 
 		return tasks
 	}
@@ -46,22 +49,17 @@ export class TaskResolver {
 
 	@UseMiddleware(isAuthenticated)
 	@Mutation(() => Task)
-	async updateTask(
-		@Arg('id', () => ID) id: string,
-		@Arg('title') title: string,
-		@Arg('description') description: string,
-		@Ctx() { req }: Context
-	): Promise<Task> {
-		const task = await postgresdb
-			.getRepository(Task)
-			.findOne({ where: { id, userId: req.user?.id }, relations: ['user'] })
+	async updateTask(@Arg('input') taskInput: TaskInput, @Ctx() { req }: Context): Promise<Task> {
+		const task = await postgresdb.getRepository(Task).findOne({
+			where: { id: taskInput.id, userId: req.user?.id },
+			relations: ['user']
+		})
 
 		if (!task) throw new Error('Task not found with that id')
 
 		const updatedTask = {
 			...task,
-			title,
-			description
+			...taskInput
 		}
 
 		return await postgresdb.getRepository(Task).save(updatedTask)

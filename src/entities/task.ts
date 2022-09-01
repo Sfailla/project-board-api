@@ -84,10 +84,13 @@ export class Task extends BaseEntity {
 @InputType()
 export class TaskInput {
 	@Field(() => ID, { nullable: true })
-	id?: string
+	id: string
+
+	@Field(() => ID)
+	projectId: string
 
 	@Field(() => String)
-	title: string
+	title?: string
 
 	@Field(() => String, { nullable: true })
 	description?: string
@@ -95,9 +98,15 @@ export class TaskInput {
 	@Field(() => String, { nullable: true })
 	asignee?: string
 
-	@Field(() => ID)
-	projectId: string
-
 	@Field(() => String, { nullable: true })
 	tagName?: string
+
+	@Field(() => Date, { nullable: true })
+	startDate?: Date
+
+	@Field(() => Date, { nullable: true })
+	endDate?: Date
+
+	@Field(() => ProjectBoardStatus, { defaultValue: ProjectBoardStatus.Open })
+	status?: ProjectBoardStatus
 }

@@ -1,6 +1,7 @@
 {
   "singleQuote": true,
-  "trailingComma": "all",
+  "trailingComma": "none",
+  "semi": false,
   "overrides": [
     {
       "files": ["*.ts", "*.mts"],

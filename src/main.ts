@@ -1,34 +1,83 @@
-/**
- * Some predefined delay values (in milliseconds).
- */
-export enum Delays {
-  Short = 500,
-  Medium = 2000,
-  Long = 5000,
+// import cookieParser from 'cookie-parser'
+import 'dotenv/config'
+import 'reflect-metadata'
+import http from 'node:http'
+import express from 'express'
+import cors, { CorsOptions } from 'cors'
+import { expressMiddleware } from '@apollo/server/express4'
+import { ApolloServerPluginDrainHttpServer } from '@apollo/server/plugin/drainHttpServer'
+import { buildSchema } from 'type-graphql'
+import { ApolloServer } from '@apollo/server'
+import { Context, JwtTokenUser, TerminalColors } from './types.js'
+import {
+  UserResolver,
+  TaskResolver,
+  TagResolver,
+  ProjectResolver
+} from './resolvers/index.js'
+import { initializePostgresDatabase } from './config/postgres-db.js'
+import {
+  ApolloServerPluginLandingPageLocalDefault,
+  ApolloServerPluginLandingPageProductionDefault
+} from '@apollo/server/plugin/landingPage/default'
+
+declare module 'express' {
+  interface Request {
+    user?: JwtTokenUser
+  }
 }
 
-/**
- * Returns a Promise<string> that resolves after a given time.
- *
- * @param {string} name - A name.
- * @param {number=} [delay=Delays.Medium] - A number of milliseconds to delay resolution of the Promise.
- * @returns {Promise<string>}
- */
-function delayedHello(
-  name: string,
-  delay: number = Delays.Medium,
-): Promise<string> {
-  return new Promise((resolve: (value?: string) => void) =>
-    setTimeout(() => resolve(`Hello, ${name}`), delay),
-  );
-}
+;(async (): Promise<void> => {
+  const app = express()
+  const httpServer = http.createServer(app)
+  const corsOptions: CorsOptions = {
+    credentials: true,
+    origin: [
+      'http://localhost:4000',
+      'http://localhost:4000/graphql',
+      'http://localhost:4200'
+    ]
+  }
+  const server = new ApolloServer({
+    schema: await buildSchema({
+      resolvers: [UserResolver, TaskResolver, TagResolver, ProjectResolver],
+      emitSchemaFile: './schema.graphql',
+      validate: false
+    }),
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      process.env.NODE_ENV === 'production'
+        ? ApolloServerPluginLandingPageProductionDefault({
+            graphRef: '',
+            footer: false
+          })
+        : ApolloServerPluginLandingPageLocalDefault({ footer: false })
+    ]
+  })
 
-// Please see the comment in the .eslintrc.json file about the suppressed rule!
-// Below is an example of how to use ESLint errors suppression. You can read more
-// at https://eslint.org/docs/latest/user-guide/configuring/rules#disabling-rules
+  initializePostgresDatabase()
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function greeter(name: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-  // The name parameter should be of type string. Any is used only to trigger the rule.
-  return await delayedHello(name, Delays.Long);
-}
+  await server.start()
+
+  app.use(
+    '/',
+    cors<cors.CorsRequest>(corsOptions),
+    // cookieParser(process.env.COOKIE_SECRET as string),
+    express.json({ limit: '5mb' }),
+    express.urlencoded({ extended: true, limit: '5mb' }),
+
+    expressMiddleware(server, {
+      context: async ({ req, res }): Promise<Context> => ({
+        req,
+        res,
+        token: req.headers['x-auth-token']
+      })
+    })
+  )
+
+  await new Promise<void>((resolve) =>
+    httpServer.listen({ port: 4000 }, resolve)
+  )
+  const terminalStatus = `[server]:🌏 running on http://localhost:${process.env.PORT}/graphql`
+  console.log(TerminalColors.Green, terminalStatus)
+})()

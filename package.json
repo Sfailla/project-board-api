@@ -27,7 +27,7 @@
   },
   "scripts": {
     "start": "npx nodemon build/src/main.js",
-    "clean": "rimraf coverage build tmp",
+    "clean": "rimraf coverage build",
     "prebuild": "npm run lint",
     "build": "tsc -p tsconfig.json",
     "build:watch": "tsc -w -p tsconfig.json",

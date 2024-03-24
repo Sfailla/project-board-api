@@ -9,7 +9,7 @@ import {
   UseMiddleware
 } from 'type-graphql'
 import { postgresdb } from '../config/postgres-db.js'
-import { Project } from '../entities/project.js'
+import { Project, ProjectInput } from '../entities/project.js'
 import { Context } from '../types.js'
 
 @Resolver(Project)
@@ -19,7 +19,8 @@ export class ProjectResolver {
   async getProjects(@Ctx() { req }: Context): Promise<Project[]> {
     return await postgresdb.getRepository(Project).find({
       where: { userId: req.user?.id },
-      relations: ['user']
+      relations: ['user'],
+      order: { createdAt: 'ASC' }
     })
   }
 
@@ -50,7 +51,7 @@ export class ProjectResolver {
 
     const newProject = await postgresdb
       .getRepository(Project)
-      .create({ name, description, userId: req.user?.id })
+      .create({ name, description, userId: req.user?.id, user: req.user })
       .save()
 
     console.log({ project: newProject })
@@ -61,13 +62,11 @@ export class ProjectResolver {
   @UseMiddleware(isAuthenticated)
   @Mutation(() => Project)
   async updateProject(
-    @Arg('id', () => ID) id: string,
-    @Arg('name', () => String) name: string,
-    @Arg('description', () => String) description: string,
+    @Arg('input') projectInput: ProjectInput,
     @Ctx() { req }: Context
   ): Promise<Project> {
     const project = await postgresdb.getRepository(Project).findOne({
-      where: { id, userId: req.user?.id },
+      where: { id: projectInput.id, userId: req.user?.id },
       relations: ['user']
     })
 
@@ -75,8 +74,8 @@ export class ProjectResolver {
 
     const updatedProject = {
       ...project,
-      name,
-      description
+      ...projectInput,
+      updatedAt: new Date()
     }
 
     // update and return the saved project by id

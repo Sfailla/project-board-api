@@ -66,6 +66,14 @@ export class UserResolver {
     return user
   }
 
+  @Query(() => NullUser)
+  logout(@Ctx() { res, req }: Context): NullUser {
+    const user = null
+    req.user = user
+    res.clearCookie('x-auth-token', { maxAge: 0 })
+    return { user }
+  }
+
   @Mutation(() => UserAndToken)
   async createUser(
     @Arg('email', () => String) email: string,
@@ -121,14 +129,6 @@ export class UserResolver {
     console.log({ user, token })
 
     return { user, token }
-  }
-
-  @Mutation(() => NullUser)
-  logout(@Ctx() { res, req }: Context): NullUser {
-    const user = null
-    req.user = user
-    res.clearCookie('x-auth-token', { maxAge: 0 })
-    return { user }
   }
 
   @UseMiddleware(isAuthenticated)

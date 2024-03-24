@@ -17,8 +17,7 @@ type Mutation {
   deleteTag(id: ID!): Boolean!
   deleteTask(id: ID!): Task!
   login(email: String!, password: String!): UserAndToken!
-  logout: NullUser!
-  updateProject(description: String!, id: ID!, name: String!): Project!
+  updateProject(input: ProjectInput!): Project!
   updateTag(input: TagInput!): Tag!
   updateTask(input: TaskInput!): Task!
   updateUserFn(input: UserInput!): User!
@@ -31,6 +30,7 @@ type NullUser {
 type Project {
   createdAt: DateTimeISO!
   description: String
+  dueDate: DateTimeISO
   id: ID!
   name: String!
   updatedAt: DateTimeISO!
@@ -46,6 +46,13 @@ enum ProjectBoardStatus {
   Review
 }
 
+input ProjectInput {
+  description: String
+  dueDate: DateTimeISO
+  id: ID!
+  name: String!
+}
+
 type Query {
   getProjectById(id: ID!): Project!
   getProjects: [Project!]!
@@ -54,6 +61,7 @@ type Query {
   getTaskById(id: ID!): Task!
   getTasks(projectId: ID!): [Task!]!
   getUserByEmail(email: String!): User!
+  logout: NullUser!
   me: User
 }
 
@@ -74,7 +82,7 @@ input TagInput {
 }
 
 type Task {
-  asignee: String
+  assignee: String
   createdAt: DateTimeISO!
   description: String
   endDate: DateTimeISO
@@ -105,15 +113,15 @@ input TaskInput {
 type User {
   avatar: String
   company: String
-  createdAt: DateTimeISO!
+  createdAt: DateTimeISO
   email: String!
   firstname: String
   fullname: String
   id: ID!
   lastname: String
-  password: String!
+  password: String
   position: String
-  updatedAt: DateTimeISO!
+  updatedAt: DateTimeISO
   username: String!
 }
 

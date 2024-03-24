@@ -22,7 +22,8 @@ export class TaskResolver {
   ): Promise<Task[]> {
     const tasks = await postgresdb.getRepository(Task).find({
       where: { userId: req.user?.id, projectId },
-      relations: ['user']
+      relations: ['user'],
+      order: { createdAt: 'ASC' }
     })
 
     return tasks

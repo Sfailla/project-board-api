@@ -88,7 +88,7 @@ export class Task extends BaseEntity {
 }
 
 @InputType()
-export class TaskInput {
+export class TaskInput implements Partial<Task> {
   @Field(() => ID, { nullable: true })
   id: string
 

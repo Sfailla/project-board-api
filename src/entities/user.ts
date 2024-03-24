@@ -61,12 +61,12 @@ export class User extends BaseEntity {
 }
 
 @InputType()
-export class UserInput {
-  @Field(() => String, { nullable: true })
-  username?: string
+export class UpdateUserInput implements Partial<User> {
+  @Field(() => String)
+  username: string
 
-  @Field(() => String, { nullable: true })
-  email?: string
+  @Field(() => String)
+  email: string
 
   @Field(() => String, { nullable: true })
   firstname?: string

@@ -35,21 +35,21 @@ export class Tag extends BaseEntity {
 
   @Field(() => Date)
   @CreateDateColumn()
-  createdAt: Date
+  createdAt?: Date
 
   @Field(() => Date)
   @UpdateDateColumn()
-  updatedAt: Date
+  updatedAt?: Date
 }
 
 @InputType()
-export class TagInput {
-  @Field(() => ID, { nullable: true })
-  id?: string
+export class TagInput implements Partial<Tag> {
+  @Field(() => ID)
+  id: string
 
-  @Field(() => String, { nullable: true })
-  name?: string
+  @Field(() => String)
+  name: string
 
-  @Field(() => String, { nullable: true })
-  color?: string
+  @Field(() => String)
+  color: string
 }

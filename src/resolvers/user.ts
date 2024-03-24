@@ -8,7 +8,7 @@ import {
   Resolver,
   UseMiddleware
 } from 'type-graphql'
-import { User, UserInput } from '../entities/user.js'
+import { UpdateUserInput, User } from '../entities/user.js'
 import { Context } from '../types.js'
 import { postgresdb } from '../config/postgres-db.js'
 import {
@@ -67,10 +67,10 @@ export class UserResolver {
   }
 
   @Query(() => NullUser)
-  logout(@Ctx() { res, req }: Context): NullUser {
+  logout(@Ctx() { req }: Context): NullUser {
     const user = null
     req.user = user
-    res.clearCookie('x-auth-token', { maxAge: 0 })
+    // res.clearCookie('x-auth-token', { maxAge: 0 })
     return { user }
   }
 
@@ -94,9 +94,6 @@ export class UserResolver {
 
     res.set('x-auth-token', token)
     // setCookie(res, 'x-auth-token', token)
-
-    console.log({ user, token })
-
     return { user, token }
   }
 
@@ -118,23 +115,20 @@ export class UserResolver {
       user.password && (await decryptPassword(password, user.password))
 
     if (!isPasswordValid) {
-      throw new Error('Invalid password')
+      throw new Error(`Invalid password for email: ${email}`)
     }
 
     const token = generateAuthToken(user)
 
     res.header('x-auth-token', token)
     // setCookie(res, 'x-auth-token', token)
-
-    console.log({ user, token })
-
     return { user, token }
   }
 
   @UseMiddleware(isAuthenticated)
   @Mutation(() => User)
-  async updateUserFn(
-    @Arg('input') userInput: UserInput,
+  async updateUser(
+    @Arg('input') userInput: UpdateUserInput,
     @Ctx() { req }: Context
   ): Promise<User> {
     const user = await postgresdb
@@ -145,6 +139,10 @@ export class UserResolver {
       throw new Error('User not found')
     }
 
-    return await postgresdb.getRepository(User).save({ ...user, ...userInput })
+    await postgresdb.getRepository(User).update(req.user?.id, userInput)
+
+    return await postgresdb
+      .getRepository(User)
+      .findOne({ where: { id: req.user?.id } })
   }
 }

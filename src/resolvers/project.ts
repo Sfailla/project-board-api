@@ -71,7 +71,7 @@ export class ProjectResolver {
 
     if (!project) throw new Error('Project not found with that id')
 
-    await postgresdb.getRepository(Project).update({ id }, projectInput)
+    await postgresdb.getRepository(Project).update(id, projectInput)
 
     return await postgresdb.getRepository(Project).findOne({
       where: { id, userId: req.user?.id },

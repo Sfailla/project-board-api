@@ -70,12 +70,12 @@ export class TagResolver {
 
     if (!tag) throw new Error('tag not found with that id')
 
-    const updatedTag = {
-      ...tag,
-      ...tagInput
-    }
+    await postgresdb.getRepository(Tag).update(tag.id, tagInput)
 
-    return await postgresdb.getRepository(Tag).save(updatedTag)
+    return await postgresdb.getRepository(Tag).findOne({
+      where: { id: tagInput.id, userId: req.user?.id },
+      relations: ['user']
+    })
   }
 
   @UseMiddleware(isAuthenticated)

@@ -56,7 +56,7 @@ export class Task extends BaseEntity {
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
-  asignee?: string
+  assignee?: string
 
   @Field(() => Date, { nullable: true })
   @Column({ nullable: true })

@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename)
 
 const entityPaths = path.join(__dirname, '../entities/*{.js,.ts}')
 const postgresTerminalSuccess =
-  '[postgres]: 🚀 ✨ data source has been initialized'
+  '[postgres]: ✨🚀 data source has been initialized'
 const postgresTerminalError =
   '[postgres]: 🧨 error during data source initialization'
 

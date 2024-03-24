@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from 'type-graphql'
+import { ObjectType, Field, ID, InputType } from 'type-graphql'
 import {
   BaseEntity,
   PrimaryGeneratedColumn,
@@ -6,12 +6,14 @@ import {
   Entity,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne
+  ManyToOne,
+  Unique
 } from 'typeorm'
 import { User } from './user.js'
 
 @Entity()
 @ObjectType()
+@Unique('UQ_USERID_NAME', ['userId', 'name'])
 export class Project extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
@@ -26,12 +28,16 @@ export class Project extends BaseEntity {
   userId: string
 
   @Field(() => String)
-  @Column({ unique: true })
+  @Column()
   name: string
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   description?: string
+
+  @Field(() => Date, { nullable: true })
+  @Column({ nullable: true })
+  dueDate?: Date
 
   @Field(() => Date)
   @CreateDateColumn()
@@ -40,4 +46,19 @@ export class Project extends BaseEntity {
   @Field(() => Date)
   @UpdateDateColumn()
   updatedAt: Date
+}
+
+@InputType()
+export class ProjectInput implements Partial<Project> {
+  @Field(() => ID)
+  id: string
+
+  @Field(() => String)
+  name: string
+
+  @Field(() => String, { nullable: true })
+  description?: string
+
+  @Field(() => Date, { nullable: true })
+  dueDate?: Date
 }

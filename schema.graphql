@@ -20,7 +20,7 @@ type Mutation {
   updateProject(input: ProjectInput!): Project!
   updateTag(input: TagInput!): Tag!
   updateTask(input: TaskInput!): Task!
-  updateUserFn(input: UserInput!): User!
+  updateUser(input: UpdateUserInput!): User!
 }
 
 type NullUser {
@@ -76,9 +76,9 @@ type Tag {
 }
 
 input TagInput {
-  color: String
-  id: ID
-  name: String
+  color: String!
+  id: ID!
+  name: String!
 }
 
 type Task {
@@ -110,6 +110,16 @@ input TaskInput {
   title: String!
 }
 
+input UpdateUserInput {
+  avatar: String
+  company: String
+  email: String!
+  firstname: String
+  lastname: String
+  position: String
+  username: String!
+}
+
 type User {
   avatar: String
   company: String
@@ -128,14 +138,4 @@ type User {
 type UserAndToken {
   token: String!
   user: User!
-}
-
-input UserInput {
-  avatar: String
-  company: String
-  email: String
-  firstname: String
-  lastname: String
-  position: String
-  username: String
 }

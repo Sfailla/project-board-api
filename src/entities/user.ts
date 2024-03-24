@@ -35,9 +35,9 @@ export class User extends BaseEntity {
   @Column({ unique: true })
   email: string
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Column()
-  password: string
+  password?: string
 
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
@@ -51,13 +51,13 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   avatar?: string
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @CreateDateColumn()
-  createdAt: Date
+  createdAt?: Date
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @CreateDateColumn()
-  updatedAt: Date
+  updatedAt?: Date
 }
 
 @InputType()

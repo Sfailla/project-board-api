@@ -54,8 +54,6 @@ export class ProjectResolver {
       .create({ name, description, userId: req.user?.id, user: req.user })
       .save()
 
-    console.log({ project: newProject })
-
     return newProject
   }
 
@@ -65,21 +63,20 @@ export class ProjectResolver {
     @Arg('input') projectInput: ProjectInput,
     @Ctx() { req }: Context
   ): Promise<Project> {
+    const { id } = projectInput
     const project = await postgresdb.getRepository(Project).findOne({
-      where: { id: projectInput.id, userId: req.user?.id },
+      where: { id, userId: req.user?.id },
       relations: ['user']
     })
 
     if (!project) throw new Error('Project not found with that id')
 
-    const updatedProject = {
-      ...project,
-      ...projectInput,
-      updatedAt: new Date()
-    }
+    await postgresdb.getRepository(Project).update({ id }, projectInput)
 
-    // update and return the saved project by id
-    return await postgresdb.getRepository(Project).save(updatedProject)
+    return await postgresdb.getRepository(Project).findOne({
+      where: { id, userId: req.user?.id },
+      relations: ['user']
+    })
   }
 
   @UseMiddleware(isAuthenticated)

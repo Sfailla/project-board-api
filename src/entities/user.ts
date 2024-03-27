@@ -60,6 +60,15 @@ export class User extends BaseEntity {
   updatedAt?: Date
 }
 
+@ObjectType()
+export class AuthUser {
+  @Field(() => User)
+  user: User
+
+  @Field(() => String)
+  token: string
+}
+
 @InputType()
 export class UpdateUserInput implements Partial<User> {
   @Field(() => String)

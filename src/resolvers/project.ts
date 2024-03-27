@@ -18,7 +18,7 @@ export class ProjectResolver {
   @Query(() => [Project])
   async getProjects(@Ctx() { req }: Context): Promise<Project[]> {
     return await postgresdb.getRepository(Project).find({
-      where: { userId: req.user?.id },
+      where: { user: { id: req.user?.id } },
       relations: ['user'],
       order: { createdAt: 'ASC' }
     })
@@ -31,7 +31,7 @@ export class ProjectResolver {
     @Ctx() { req }: Context
   ): Promise<Project> {
     const project = await postgresdb.getRepository(Project).findOne({
-      where: { id, userId: req.user?.id },
+      where: { id, user: { id: req.user?.id } },
       relations: ['user']
     })
 
@@ -47,14 +47,15 @@ export class ProjectResolver {
     @Arg('description', () => String, { nullable: true }) description: string,
     @Ctx() { req }: Context
   ): Promise<Project> {
-    console.log({ name, description, userId: req.user?.id })
-
-    const newProject = await postgresdb
+    await postgresdb
       .getRepository(Project)
-      .create({ name, description, userId: req.user?.id, user: req.user })
+      .create({ name, description, user: { id: req.user?.id } })
       .save()
 
-    return newProject
+    return await postgresdb.getRepository(Project).findOne({
+      where: { name, user: { id: req.user?.id } },
+      relations: ['user']
+    })
   }
 
   @UseMiddleware(isAuthenticated)
@@ -65,7 +66,7 @@ export class ProjectResolver {
   ): Promise<Project> {
     const { id } = projectInput
     const project = await postgresdb.getRepository(Project).findOne({
-      where: { id, userId: req.user?.id },
+      where: { id, user: { id: req.user?.id } },
       relations: ['user']
     })
 
@@ -74,7 +75,7 @@ export class ProjectResolver {
     await postgresdb.getRepository(Project).update(id, projectInput)
 
     return await postgresdb.getRepository(Project).findOne({
-      where: { id, userId: req.user?.id },
+      where: { id, user: { id: req.user?.id } },
       relations: ['user']
     })
   }
@@ -87,11 +88,10 @@ export class ProjectResolver {
   ): Promise<boolean> {
     const project = await postgresdb
       .getRepository(Project)
-      .findOne({ where: { id, userId: req.user?.id } })
+      .findOne({ where: { id, user: { id: req.user?.id } } })
 
     if (!project) throw new Error('Project not found with that id')
 
-    // assign to a variable to see what is returned after a delete is performed
     await postgresdb.getRepository(Project).delete({ id })
 
     return true

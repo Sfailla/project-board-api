@@ -20,13 +20,11 @@ export class TaskResolver {
     @Arg('projectId', () => ID) projectId: string,
     @Ctx() { req }: Context
   ): Promise<Task[]> {
-    const tasks = await postgresdb.getRepository(Task).find({
-      where: { userId: req.user?.id, projectId },
-      relations: ['user'],
+    return await postgresdb.getRepository(Task).find({
+      where: { user: { id: req.user?.id }, project: { id: projectId } },
+      relations: ['user', 'project'],
       order: { createdAt: 'ASC' }
     })
-
-    return tasks
   }
 
   @UseMiddleware(isAuthenticated)
@@ -36,7 +34,7 @@ export class TaskResolver {
     @Ctx() { req }: Context
   ): Promise<Task> {
     const task = await postgresdb.getRepository(Task).findOne({
-      where: { id, userId: req.user?.id },
+      where: { id, user: { id: req.user?.id } },
       relations: ['user']
     })
 
@@ -51,17 +49,23 @@ export class TaskResolver {
     @Arg('input') taskInput: TaskInput,
     @Ctx() { req }: Context
   ): Promise<Task> {
-    const task = await postgresdb
+    await postgresdb
       .getRepository(Task)
       .create({
         ...taskInput,
-        userId: req.user?.id
+        user: { id: req.user?.id },
+        project: { id: taskInput.projectId }
       })
       .save()
 
-    if (!task) throw new Error('Task not found with that id')
-
-    return task
+    return await postgresdb.getRepository(Task).findOne({
+      where: {
+        title: taskInput.title,
+        user: { id: req.user?.id },
+        project: { id: taskInput.projectId }
+      },
+      relations: ['user', 'project']
+    })
   }
 
   @UseMiddleware(isAuthenticated)
@@ -71,18 +75,18 @@ export class TaskResolver {
     @Ctx() { req }: Context
   ): Promise<Task> {
     const task = await postgresdb.getRepository(Task).findOne({
-      where: { id: taskInput.id, userId: req.user?.id },
+      where: { id: taskInput.id, user: { id: req.user?.id } },
       relations: ['user']
     })
 
     if (!task) throw new Error('Task not found with that id')
 
-    const updatedTask = {
-      ...task,
-      ...taskInput
-    }
+    await postgresdb.getRepository(Task).update(task.id, taskInput)
 
-    return await postgresdb.getRepository(Task).save(updatedTask)
+    return await postgresdb.getRepository(Task).findOne({
+      where: { id: taskInput.id, user: { id: req.user?.id } },
+      relations: ['user']
+    })
   }
 
   @UseMiddleware(isAuthenticated)
@@ -92,11 +96,11 @@ export class TaskResolver {
     @Ctx() { req }: Context
   ): Promise<Task> {
     const task = await postgresdb.getRepository(Task).findOne({
-      where: { id, userId: req.user?.id },
+      where: { id, user: { id: req.user?.id } },
       relations: ['user']
     })
 
-    if (!task) throw new Error('Task not found with that id')
+    if (!task) throw new Error('No task found with that id')
 
     return await postgresdb.getRepository(Task).remove(task)
   }

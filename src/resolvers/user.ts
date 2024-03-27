@@ -1,38 +1,20 @@
 import {
   Arg,
   Ctx,
-  Field,
   Mutation,
-  ObjectType,
   Query,
   Resolver,
   UseMiddleware
 } from 'type-graphql'
-import { UpdateUserInput, User } from '../entities/user.js'
+import { UpdateUserInput, User, AuthUser } from '../entities/user.js'
 import { Context } from '../types.js'
 import { postgresdb } from '../config/postgres-db.js'
 import {
   decryptPassword,
   encryptPassword,
   generateAuthToken
-  // setCookie
 } from '../utils/helper-fns.js'
 import { isAuthenticated } from '../middleware/isAuthenticated.js'
-
-@ObjectType()
-export class NullUser {
-  @Field(() => String, { nullable: true })
-  user: null
-}
-
-@ObjectType()
-export class UserAndToken {
-  @Field(() => User)
-  user: User
-
-  @Field(() => String)
-  token: string
-}
 
 @Resolver()
 export class UserResolver {
@@ -66,15 +48,14 @@ export class UserResolver {
     return user
   }
 
-  @Query(() => NullUser)
-  logout(@Ctx() { req }: Context): NullUser {
-    const user = null
-    req.user = user
-    // res.clearCookie('x-auth-token', { maxAge: 0 })
-    return { user }
+  @Query(() => User, { nullable: true })
+  logout(@Ctx() { req }: Context): { user: null } {
+    req.user = null
+    req.headers['x-auth-token'] = null
+    return { user: null }
   }
 
-  @Mutation(() => UserAndToken)
+  @Mutation(() => AuthUser)
   async createUser(
     @Arg('email', () => String) email: string,
     @Arg('username', () => String) username: string,
@@ -93,11 +74,11 @@ export class UserResolver {
     const token = generateAuthToken(user)
 
     res.set('x-auth-token', token)
-    // setCookie(res, 'x-auth-token', token)
+
     return { user, token }
   }
 
-  @Mutation(() => UserAndToken)
+  @Mutation(() => AuthUser)
   async login(
     @Arg('email', () => String) email: string,
     @Arg('password', () => String) password: string,
@@ -121,7 +102,7 @@ export class UserResolver {
     const token = generateAuthToken(user)
 
     res.header('x-auth-token', token)
-    // setCookie(res, 'x-auth-token', token)
+
     return { user, token }
   }
 

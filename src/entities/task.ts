@@ -13,7 +13,8 @@ import {
   Entity,
   CreateDateColumn,
   UpdateDateColumn,
-  ManyToOne
+  ManyToOne,
+  JoinColumn
 } from 'typeorm'
 import { Project } from './project.js'
 import { User } from './user.js'
@@ -31,20 +32,14 @@ export class Task extends BaseEntity {
   id: string
 
   @Field(() => Project)
+  @JoinColumn({ name: 'project' })
   @ManyToOne(() => Project, (project) => project.id)
   project: Project
 
-  @Field(() => ID)
-  @Column()
-  projectId: string
-
   @Field(() => User)
+  @JoinColumn({ name: 'user' })
   @ManyToOne(() => User, (user) => user.id)
   user: User
-
-  @Field(() => ID)
-  @Column()
-  userId: string
 
   @Field(() => String)
   @Column()

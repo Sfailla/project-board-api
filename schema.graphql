@@ -3,6 +3,11 @@
 # !!!   DO NOT MODIFY THIS FILE BY YOURSELF   !!!
 # -----------------------------------------------
 
+type AuthUser {
+  token: String!
+  user: User!
+}
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.This scalar is serialized to a string in ISO 8601 format and parsed from a string in ISO 8601 format.
 """
@@ -12,19 +17,15 @@ type Mutation {
   createProject(description: String, name: String!): Project!
   createTag(input: TagInput!): Tag!
   createTask(input: TaskInput!): Task!
-  createUser(email: String!, password: String!, username: String!): UserAndToken!
+  createUser(email: String!, password: String!, username: String!): AuthUser!
   deleteProject(id: ID!): Boolean!
   deleteTag(id: ID!): Boolean!
   deleteTask(id: ID!): Task!
-  login(email: String!, password: String!): UserAndToken!
+  login(email: String!, password: String!): AuthUser!
   updateProject(input: ProjectInput!): Project!
   updateTag(input: TagInput!): Tag!
   updateTask(input: TaskInput!): Task!
   updateUser(input: UpdateUserInput!): User!
-}
-
-type NullUser {
-  user: String
 }
 
 type Project {
@@ -35,7 +36,6 @@ type Project {
   name: String!
   updatedAt: DateTimeISO!
   user: User!
-  userId: ID!
 }
 
 """The status of the task described on project board"""
@@ -61,7 +61,7 @@ type Query {
   getTaskById(id: ID!): Task!
   getTasks(projectId: ID!): [Task!]!
   getUserByEmail(email: String!): User!
-  logout: NullUser!
+  logout: User
   me: User
 }
 
@@ -88,14 +88,12 @@ type Task {
   endDate: DateTimeISO
   id: ID!
   project: Project!
-  projectId: ID!
   startDate: DateTimeISO
   status: ProjectBoardStatus!
   tagName: String
   title: String!
   updatedAt: DateTimeISO!
   user: User!
-  userId: ID!
 }
 
 input TaskInput {
@@ -133,9 +131,4 @@ type User {
   position: String
   updatedAt: DateTimeISO
   username: String!
-}
-
-type UserAndToken {
-  token: String!
-  user: User!
 }

@@ -7,25 +7,23 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  Unique
+  Unique,
+  JoinColumn
 } from 'typeorm'
 import { User } from './user.js'
 
 @Entity()
 @ObjectType()
-@Unique('UQ_USERID_NAME', ['userId', 'name'])
+@Unique('UQ_USER_NAME', ['name', 'user'])
 export class Project extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Field(() => User)
+  @JoinColumn({ name: 'user' })
   @ManyToOne(() => User, (user) => user.id)
   user: User
-
-  @Field(() => ID)
-  @Column()
-  userId: string
 
   @Field(() => String)
   @Column()

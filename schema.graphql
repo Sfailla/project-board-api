@@ -13,7 +13,12 @@ A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `dat
 """
 scalar DateTimeISO
 
+type LogoutUser {
+  user: String
+}
+
 type Mutation {
+  addTags(tagIds: [ID!]!, taskId: ID!): Task!
   createProject(description: String, name: String!): Project!
   createTag(input: TagInput!): Tag!
   createTask(input: TaskInput!): Task!
@@ -61,7 +66,7 @@ type Query {
   getTaskById(id: ID!): Task!
   getTasks(projectId: ID!): [Task!]!
   getUserByEmail(email: String!): User!
-  logout: User
+  logout: LogoutUser
   me: User
 }
 
@@ -71,14 +76,14 @@ type Tag {
   id: ID!
   name: String!
   updatedAt: DateTimeISO!
-  user: [User!]
-  userId: ID
+  user: User
 }
 
 input TagInput {
   color: String!
   id: ID!
   name: String!
+  taskId: ID!
 }
 
 type Task {
@@ -87,10 +92,10 @@ type Task {
   description: String
   endDate: DateTimeISO
   id: ID!
-  project: Project!
+  project: Project
   startDate: DateTimeISO
   status: ProjectBoardStatus!
-  tagName: String
+  tags: [Tag!]!
   title: String!
   updatedAt: DateTimeISO!
   user: User!
@@ -103,9 +108,9 @@ input TaskInput {
   id: ID
   projectId: ID!
   startDate: DateTimeISO
-  status: ProjectBoardStatus! = Open
-  tagName: String
-  title: String!
+  status: ProjectBoardStatus = Open
+  tagIds: [ID!]
+  title: String
 }
 
 input UpdateUserInput {

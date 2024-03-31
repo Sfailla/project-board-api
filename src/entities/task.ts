@@ -14,10 +14,14 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
-  JoinColumn
+  JoinColumn,
+  Unique,
+  ManyToMany,
+  JoinTable
 } from 'typeorm'
 import { Project } from './project.js'
 import { User } from './user.js'
+import { Tag } from './tag.js'
 
 registerEnumType(ProjectBoardStatus, {
   name: 'ProjectBoardStatus',
@@ -25,20 +29,32 @@ registerEnumType(ProjectBoardStatus, {
 })
 
 @Entity()
+@Unique('UQ_TASK_TITLE', ['title', 'user'])
 @ObjectType()
 export class Task extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Field(() => Project)
+  @Field(() => Project, { nullable: true })
   @JoinColumn({ name: 'project' })
-  @ManyToOne(() => Project, (project) => project.id)
+  @ManyToOne(() => Project, (project) => project.id, {
+    onDelete: 'CASCADE'
+  })
   project: Project
+
+  @Field(() => [Tag], { defaultValue: [] })
+  @JoinTable({ name: 'task_tags_relation' })
+  @ManyToMany(() => Tag, (tag) => tag.id, {
+    onDelete: 'CASCADE'
+  })
+  tags: Tag[]
 
   @Field(() => User)
   @JoinColumn({ name: 'user' })
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE'
+  })
   user: User
 
   @Field(() => String)
@@ -69,10 +85,6 @@ export class Task extends BaseEntity {
   })
   status: ProjectBoardStatus
 
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  tagName: string
-
   @Field(() => Date)
   @CreateDateColumn()
   createdAt: Date
@@ -85,12 +97,12 @@ export class Task extends BaseEntity {
 @InputType()
 export class TaskInput implements Partial<Task> {
   @Field(() => ID, { nullable: true })
-  id: string
+  id?: string
 
   @Field(() => ID)
   projectId: string
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   title?: string
 
   @Field(() => String, { nullable: true })
@@ -99,8 +111,8 @@ export class TaskInput implements Partial<Task> {
   @Field(() => String, { nullable: true })
   asignee?: string
 
-  @Field(() => String, { nullable: true })
-  tagName?: string
+  @Field(() => [ID], { nullable: true })
+  tagIds?: string[]
 
   @Field(() => Date, { nullable: true })
   startDate?: Date
@@ -108,6 +120,9 @@ export class TaskInput implements Partial<Task> {
   @Field(() => Date, { nullable: true })
   endDate?: Date
 
-  @Field(() => ProjectBoardStatus, { defaultValue: ProjectBoardStatus.Open })
+  @Field(() => ProjectBoardStatus, {
+    defaultValue: ProjectBoardStatus.Open,
+    nullable: true
+  })
   status?: ProjectBoardStatus
 }

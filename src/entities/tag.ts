@@ -6,11 +6,14 @@ import {
   UpdateDateColumn,
   Column,
   Entity,
-  ManyToOne
+  JoinColumn,
+  ManyToOne,
+  Unique
 } from 'typeorm'
 import { User } from './user.js'
 
 @Entity()
+@Unique('UQ_TAG_NAME', ['name', 'user'])
 @ObjectType()
 export class Tag extends BaseEntity {
   @Field(() => ID)
@@ -25,13 +28,12 @@ export class Tag extends BaseEntity {
   @Column()
   color: string
 
-  @Field(() => [User], { nullable: true })
-  @ManyToOne(() => User, (user) => user.id)
-  user?: User[]
-
-  @Field(() => ID, { nullable: true })
-  @Column({ nullable: true })
-  userId?: string
+  @Field(() => User, { nullable: true })
+  @JoinColumn({ name: 'user' })
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE'
+  })
+  user: User
 
   @Field(() => Date)
   @CreateDateColumn()
@@ -45,11 +47,14 @@ export class Tag extends BaseEntity {
 @InputType()
 export class TagInput implements Partial<Tag> {
   @Field(() => ID)
-  id: string
+  id?: string
 
   @Field(() => String)
   name: string
 
   @Field(() => String)
   color: string
+
+  @Field(() => ID)
+  taskId: string
 }

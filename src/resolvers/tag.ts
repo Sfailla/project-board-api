@@ -17,14 +17,18 @@ export class TagResolver {
   @UseMiddleware(isAuthenticated)
   @Query(() => [Tag])
   async getTags(@Ctx() { req }: Context): Promise<Tag[]> {
-    const tags = await postgresdb
+    const defaultTags = await postgresdb
       .getRepository(Tag)
       .createQueryBuilder('tag')
-      .where('tag.userId = :userId', { userId: req.user?.id })
-      .orWhere('tag.userId IS NULL')
+      .where('tag.user IS NULL')
       .getMany()
 
-    return tags
+    const userTags = await postgresdb.getRepository(Tag).find({
+      where: { user: { id: req.user?.id } },
+      relations: ['user']
+    })
+
+    return [...defaultTags, ...userTags]
   }
 
   @UseMiddleware(isAuthenticated)
@@ -35,7 +39,7 @@ export class TagResolver {
   ): Promise<Tag> {
     const tag = await postgresdb
       .getRepository(Tag)
-      .findOne({ where: { id, userId: req.user?.id } })
+      .findOne({ where: { id, user: { id: req.user?.id } } })
 
     if (!tag) throw new Error('tag not found with that id')
 
@@ -50,7 +54,7 @@ export class TagResolver {
   ): Promise<Tag> {
     const tag = await postgresdb
       .getRepository(Tag)
-      .create({ ...tagInput, userId: req.user?.id })
+      .create({ ...tagInput, user: { id: req.user?.id } })
       .save()
 
     if (!tag) throw new Error('tag not found with that id')
@@ -65,7 +69,7 @@ export class TagResolver {
     @Ctx() { req }: Context
   ): Promise<Tag> {
     const tag = await postgresdb.getRepository(Tag).findOne({
-      where: { id: tagInput.id, userId: req.user?.id }
+      where: { id: tagInput.id, user: { id: req.user?.id } }
     })
 
     if (!tag) throw new Error('tag not found with that id')
@@ -73,7 +77,7 @@ export class TagResolver {
     await postgresdb.getRepository(Tag).update(tag.id, tagInput)
 
     return await postgresdb.getRepository(Tag).findOne({
-      where: { id: tagInput.id, userId: req.user?.id },
+      where: { id: tagInput.id, user: { id: req.user?.id } },
       relations: ['user']
     })
   }
@@ -85,7 +89,7 @@ export class TagResolver {
     @Ctx() { req }: Context
   ): Promise<boolean> {
     const tag = await postgresdb.getRepository(Tag).findOne({
-      where: { id, userId: req.user?.id }
+      where: { id, user: { id: req.user?.id } }
     })
 
     if (!tag) throw new Error('tag not found with that id')

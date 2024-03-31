@@ -11,6 +11,8 @@ import {
 } from 'type-graphql'
 import { Context } from '../types.js'
 import { isAuthenticated } from '../middleware/isAuthenticated.js'
+import { Tag } from '../entities/tag.js'
+import { In } from 'typeorm'
 
 @Resolver()
 export class TaskResolver {
@@ -20,11 +22,17 @@ export class TaskResolver {
     @Arg('projectId', () => ID) projectId: string,
     @Ctx() { req }: Context
   ): Promise<Task[]> {
-    return await postgresdb.getRepository(Task).find({
-      where: { user: { id: req.user?.id }, project: { id: projectId } },
-      relations: ['user', 'project'],
-      order: { createdAt: 'ASC' }
-    })
+    const tasks = await postgresdb
+      .getRepository(Task)
+      .createQueryBuilder('task')
+      .leftJoinAndSelect('task.tags', 'tags')
+      .leftJoinAndSelect('task.user', 'user')
+      .leftJoinAndSelect('task.project', 'project')
+      .where('task.project = :projectId', { projectId })
+      .andWhere('task.user = :userId', { userId: req.user?.id })
+      .getMany()
+
+    return tasks
   }
 
   @UseMiddleware(isAuthenticated)
@@ -35,7 +43,7 @@ export class TaskResolver {
   ): Promise<Task> {
     const task = await postgresdb.getRepository(Task).findOne({
       where: { id, user: { id: req.user?.id } },
-      relations: ['user']
+      relations: ['user', 'project', 'tags']
     })
 
     if (!task) throw new Error('Task not found with that id')
@@ -49,23 +57,57 @@ export class TaskResolver {
     @Arg('input') taskInput: TaskInput,
     @Ctx() { req }: Context
   ): Promise<Task> {
-    await postgresdb
-      .getRepository(Task)
-      .create({
-        ...taskInput,
-        user: { id: req.user?.id },
-        project: { id: taskInput.projectId }
-      })
-      .save()
+    const tagRepository = postgresdb.getRepository(Tag)
+    const taskRepository = postgresdb.getRepository(Task)
 
-    return await postgresdb.getRepository(Task).findOne({
-      where: {
-        title: taskInput.title,
-        user: { id: req.user?.id },
-        project: { id: taskInput.projectId }
-      },
-      relations: ['user', 'project']
+    const tags = await tagRepository.findBy({ id: In([...taskInput.tagIds]) })
+
+    const task = taskRepository.create({
+      ...taskInput,
+      user: { id: req.user?.id },
+      project: { id: taskInput.projectId },
+      tags
     })
+
+    await taskRepository.save(task)
+
+    return await taskRepository.findOne({
+      where: { id: task.id, user: { id: req.user?.id } },
+      relations: ['user', 'project', 'tags']
+    })
+  }
+
+  @UseMiddleware(isAuthenticated)
+  @Mutation(() => Task)
+  async addTags(
+    @Arg('taskId', () => ID) taskId: string,
+    @Arg('tagIds', () => [ID]) tagIds: string[],
+    @Ctx() { req }: Context
+  ): Promise<Task> {
+    const taskRepository = postgresdb.getRepository(Task)
+    const tagRepository = postgresdb.getRepository(Tag)
+
+    const task = await taskRepository
+      .createQueryBuilder('task')
+      .leftJoinAndSelect('task.tags', 'tags')
+      .leftJoinAndSelect('task.user', 'user')
+      .leftJoinAndSelect('task.project', 'project')
+      .where('task.id = :taskId', { taskId })
+      .andWhere('task.user = :userId', { userId: req.user?.id })
+      .getOne()
+
+    if (!task) throw new Error('Task not found with that id')
+
+    const tags = await tagRepository.find({ where: { id: In(tagIds) } })
+
+    if (tags.length !== tagIds.length)
+      throw new Error('Some tags were not found')
+
+    task.tags = [...task.tags, ...tags]
+
+    await taskRepository.save(task)
+
+    return task
   }
 
   @UseMiddleware(isAuthenticated)
@@ -75,8 +117,12 @@ export class TaskResolver {
     @Ctx() { req }: Context
   ): Promise<Task> {
     const task = await postgresdb.getRepository(Task).findOne({
-      where: { id: taskInput.id, user: { id: req.user?.id } },
-      relations: ['user']
+      where: {
+        id: taskInput.id,
+        user: { id: req.user?.id },
+        project: { id: taskInput.projectId }
+      },
+      relations: ['user', 'project']
     })
 
     if (!task) throw new Error('Task not found with that id')
@@ -85,7 +131,7 @@ export class TaskResolver {
 
     return await postgresdb.getRepository(Task).findOne({
       where: { id: taskInput.id, user: { id: req.user?.id } },
-      relations: ['user']
+      relations: ['user', 'project', 'tags']
     })
   }
 
@@ -97,7 +143,7 @@ export class TaskResolver {
   ): Promise<Task> {
     const task = await postgresdb.getRepository(Task).findOne({
       where: { id, user: { id: req.user?.id } },
-      relations: ['user']
+      relations: ['user', 'project']
     })
 
     if (!task) throw new Error('No task found with that id')

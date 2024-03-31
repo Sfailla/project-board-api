@@ -6,7 +6,12 @@ import {
   Resolver,
   UseMiddleware
 } from 'type-graphql'
-import { UpdateUserInput, User, AuthUser } from '../entities/user.js'
+import {
+  UpdateUserInput,
+  User,
+  AuthUser,
+  LogoutUser
+} from '../entities/user.js'
 import { Context } from '../types.js'
 import { postgresdb } from '../config/postgres-db.js'
 import {
@@ -48,7 +53,7 @@ export class UserResolver {
     return user
   }
 
-  @Query(() => User, { nullable: true })
+  @Query(() => LogoutUser, { nullable: true })
   logout(@Ctx() { req }: Context): { user: null } {
     req.user = null
     req.headers['x-auth-token'] = null

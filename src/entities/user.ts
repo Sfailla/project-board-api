@@ -69,6 +69,12 @@ export class AuthUser {
   token: string
 }
 
+@ObjectType()
+export class LogoutUser {
+  @Field(() => String, { nullable: true })
+  user: null
+}
+
 @InputType()
 export class UpdateUserInput implements Partial<User> {
   @Field(() => String)

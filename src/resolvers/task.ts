@@ -127,7 +127,17 @@ export class TaskResolver {
 
     if (!task) throw new Error('Task not found with that id')
 
-    await postgresdb.getRepository(Task).update(task.id, taskInput)
+    const updates = Object.assign({
+      id: taskInput.id,
+      title: taskInput.title || task.title,
+      description: taskInput.description || task.description,
+      assignee: taskInput.assignee || task.assignee,
+      startDate: taskInput.startDate || task.startDate,
+      endDate: taskInput.endDate || task.endDate,
+      status: taskInput.status || task.status
+    })
+
+    await postgresdb.getRepository(Task).update(task.id, updates)
 
     return await postgresdb.getRepository(Task).findOne({
       where: { id: taskInput.id, user: { id: req.user?.id } },

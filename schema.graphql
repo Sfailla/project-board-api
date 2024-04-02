@@ -102,7 +102,7 @@ type Task {
 }
 
 input TaskInput {
-  asignee: String
+  assignee: String
   description: String
   endDate: DateTimeISO
   id: ID

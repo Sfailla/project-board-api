@@ -109,7 +109,7 @@ export class TaskInput implements Partial<Task> {
   description?: string
 
   @Field(() => String, { nullable: true })
-  asignee?: string
+  assignee?: string
 
   @Field(() => [ID], { nullable: true })
   tagIds?: string[]

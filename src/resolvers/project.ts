@@ -16,7 +16,7 @@ import { Context } from '../types.js'
 export class ProjectResolver {
   @UseMiddleware(isAuthenticated)
   @Query(() => [Project])
-  async getProjects(@Ctx() { req }: Context): Promise<Project[]> {
+  async projects(@Ctx() { req }: Context): Promise<Project[]> {
     return await postgresdb.getRepository(Project).find({
       where: { user: { id: req.user?.id } },
       relations: ['user'],
@@ -26,7 +26,7 @@ export class ProjectResolver {
 
   @UseMiddleware(isAuthenticated)
   @Query(() => Project)
-  async getProjectById(
+  async project(
     @Arg('id', () => ID) id: string,
     @Ctx() { req }: Context
   ): Promise<Project> {

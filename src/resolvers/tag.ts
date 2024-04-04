@@ -16,7 +16,7 @@ import { isAuthenticated } from '../middleware/isAuthenticated.js'
 export class TagResolver {
   @UseMiddleware(isAuthenticated)
   @Query(() => [Tag])
-  async getTags(@Ctx() { req }: Context): Promise<Tag[]> {
+  async tags(@Ctx() { req }: Context): Promise<Tag[]> {
     const defaultTags = await postgresdb
       .getRepository(Tag)
       .createQueryBuilder('tag')
@@ -33,7 +33,7 @@ export class TagResolver {
 
   @UseMiddleware(isAuthenticated)
   @Query(() => Tag)
-  async getTagById(
+  async tag(
     @Arg('id', () => ID) id: string,
     @Ctx() { req }: Context
   ): Promise<Tag> {

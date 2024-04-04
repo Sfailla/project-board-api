@@ -18,7 +18,7 @@ import { In } from 'typeorm'
 export class TaskResolver {
   @UseMiddleware(isAuthenticated)
   @Query(() => [Task])
-  async getTasks(
+  async tasks(
     @Arg('projectId', () => ID) projectId: string,
     @Ctx() { req }: Context
   ): Promise<Task[]> {
@@ -37,7 +37,7 @@ export class TaskResolver {
 
   @UseMiddleware(isAuthenticated)
   @Query(() => Task)
-  async getTaskById(
+  async task(
     @Arg('id', () => ID) id: string,
     @Ctx() { req }: Context
   ): Promise<Task> {

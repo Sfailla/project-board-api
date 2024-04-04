@@ -59,15 +59,15 @@ input ProjectInput {
 }
 
 type Query {
-  getProjectById(id: ID!): Project!
-  getProjects: [Project!]!
-  getTagById(id: ID!): Tag!
-  getTags: [Tag!]!
-  getTaskById(id: ID!): Task!
-  getTasks(projectId: ID!): [Task!]!
   getUserByEmail(email: String!): User!
   logout: LogoutUser
   me: User
+  project(id: ID!): Project!
+  projects: [Project!]!
+  tag(id: ID!): Tag!
+  tags: [Tag!]!
+  task(id: ID!): Task!
+  tasks(projectId: ID!): [Task!]!
 }
 
 type Tag {
@@ -81,9 +81,8 @@ type Tag {
 
 input TagInput {
   color: String!
-  id: ID!
+  id: ID
   name: String!
-  taskId: ID!
 }
 
 type Task {

@@ -24,7 +24,10 @@ export class User extends BaseEntity {
 
   @Field(() => String, { nullable: true })
   get fullname(): string {
-    return `${this.firstname} ${this.lastname}`
+    if (this.firstname && this.lastname) {
+      return `${this.firstname} ${this.lastname}`
+    }
+    return null
   }
 
   @Field(() => String)

@@ -52,14 +52,10 @@ export class TagResolver {
     @Arg('input') tagInput: TagInput,
     @Ctx() { req }: Context
   ): Promise<Tag> {
-    const tag = await postgresdb
+    return await postgresdb
       .getRepository(Tag)
       .create({ ...tagInput, user: { id: req.user?.id } })
       .save()
-
-    if (!tag) throw new Error('tag not found with that id')
-
-    return tag
   }
 
   @UseMiddleware(isAuthenticated)

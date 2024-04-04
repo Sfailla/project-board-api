@@ -35,7 +35,8 @@ declare module 'express' {
     origin: [
       'http://localhost:4000',
       'http://localhost:4000/graphql',
-      'http://localhost:4200'
+      'http://localhost:4200',
+      'https://studio.apollographql.com'
     ]
   }
   const server = new ApolloServer({

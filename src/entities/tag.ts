@@ -46,7 +46,7 @@ export class Tag extends BaseEntity {
 
 @InputType()
 export class TagInput implements Partial<Tag> {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: true })
   id?: string
 
   @Field(() => String)
@@ -54,7 +54,4 @@ export class TagInput implements Partial<Tag> {
 
   @Field(() => String)
   color: string
-
-  @Field(() => ID)
-  taskId: string
 }

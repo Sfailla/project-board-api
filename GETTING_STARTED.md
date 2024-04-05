@@ -3,7 +3,7 @@
 to get started and access the postgres db enter the following command in the terminal
 
 ```shell
-psql -h localhost -p 5432 -d project-board-db -U sfailla
+psql -h localhost -p 5432 -d project-board-db -U steven.failla
 ```
 
 ## Running the project

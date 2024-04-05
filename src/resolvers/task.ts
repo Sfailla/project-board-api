@@ -22,7 +22,7 @@ export class TaskResolver {
     @Arg('projectId', () => ID) projectId: string,
     @Ctx() { req }: Context
   ): Promise<Task[]> {
-    const tasks = await postgresdb
+    return await postgresdb
       .getRepository(Task)
       .createQueryBuilder('task')
       .leftJoinAndSelect('task.tags', 'tags')
@@ -31,8 +31,6 @@ export class TaskResolver {
       .where('task.project = :projectId', { projectId })
       .andWhere('task.user = :userId', { userId: req.user?.id })
       .getMany()
-
-    return tasks
   }
 
   @UseMiddleware(isAuthenticated)
@@ -60,7 +58,8 @@ export class TaskResolver {
     const tagRepository = postgresdb.getRepository(Tag)
     const taskRepository = postgresdb.getRepository(Task)
 
-    const tags = await tagRepository.findBy({ id: In([...taskInput.tagIds]) })
+    const tags =
+      (await tagRepository.findBy({ id: In([...taskInput.tagIds]) })) || []
 
     const task = taskRepository.create({
       ...taskInput,

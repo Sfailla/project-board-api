@@ -52,10 +52,15 @@ export class TagResolver {
     @Arg('input') tagInput: TagInput,
     @Ctx() { req }: Context
   ): Promise<Tag> {
-    return await postgresdb
+    await postgresdb
       .getRepository(Tag)
       .create({ ...tagInput, user: { id: req.user?.id } })
       .save()
+
+    return await postgresdb.getRepository(Tag).findOne({
+      where: { name: tagInput.name, user: { id: req.user?.id } },
+      relations: ['user']
+    })
   }
 
   @UseMiddleware(isAuthenticated)

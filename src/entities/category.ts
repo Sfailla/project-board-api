@@ -31,13 +31,13 @@ export class Category extends BaseEntity {
   @ManyToOne(() => User, (user) => user.id)
   user: User | null
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @CreateDateColumn()
-  createdAt: Date
+  createdAt?: Date
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
-  updatedAt: Date
+  updatedAt?: Date
 }
 
 @InputType()

@@ -1,11 +1,4 @@
-import {
-  ObjectType,
-  Field,
-  ID,
-  registerEnumType,
-  InputType
-} from 'type-graphql'
-import { ProjectBoardStatus } from '../types.js'
+import { ObjectType, Field, ID, InputType } from 'type-graphql'
 import {
   BaseEntity,
   PrimaryGeneratedColumn,
@@ -23,11 +16,6 @@ import { Project } from './project.js'
 import { User } from './user.js'
 import { Tag } from './tag.js'
 
-registerEnumType(ProjectBoardStatus, {
-  name: 'ProjectBoardStatus',
-  description: 'The status of the task described on project board'
-})
-
 @Entity()
 @Unique('UQ_TASK_TITLE', ['title', 'user'])
 @ObjectType()
@@ -44,7 +32,7 @@ export class Task extends BaseEntity {
   project: Project
 
   @Field(() => [Tag], { defaultValue: [] })
-  @JoinTable({ name: 'task_tags_relation' })
+  @JoinTable({ name: 'task_tags' })
   @ManyToMany(() => Tag, (tag) => tag.id, {
     onDelete: 'CASCADE'
   })
@@ -77,13 +65,9 @@ export class Task extends BaseEntity {
   @Column({ nullable: true })
   endDate: Date
 
-  @Field(() => ProjectBoardStatus, { defaultValue: ProjectBoardStatus.Open })
-  @Column({
-    type: 'enum',
-    enum: ProjectBoardStatus,
-    default: ProjectBoardStatus.Open
-  })
-  status: ProjectBoardStatus
+  @Field(() => String, { defaultValue: 'Open' })
+  @Column()
+  status: string
 
   @Field(() => Date)
   @CreateDateColumn()
@@ -120,9 +104,9 @@ export class TaskInput implements Partial<Task> {
   @Field(() => Date, { nullable: true })
   endDate?: Date
 
-  @Field(() => ProjectBoardStatus, {
-    defaultValue: ProjectBoardStatus.Open,
+  @Field(() => String, {
+    defaultValue: 'Open',
     nullable: true
   })
-  status?: ProjectBoardStatus
+  status?: string
 }

@@ -97,7 +97,7 @@ export class TaskResolver {
 
     if (!task) throw new Error('Task not found with that id')
 
-    const tags = await tagRepository.find({ where: { id: In(tagIds) } })
+    const tags = await tagRepository.findBy({ id: In(tagIds) })
 
     if (tags.length !== tagIds.length)
       throw new Error('Some tags were not found')

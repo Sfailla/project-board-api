@@ -13,7 +13,8 @@ import {
   UserResolver,
   TaskResolver,
   TagResolver,
-  ProjectResolver
+  ProjectResolver,
+  CategoryResolver
 } from './resolvers/index.js'
 import { initializePostgresDatabase } from './config/postgres-db.js'
 import {
@@ -41,7 +42,13 @@ declare module 'express' {
   }
   const server = new ApolloServer({
     schema: await buildSchema({
-      resolvers: [UserResolver, TaskResolver, TagResolver, ProjectResolver],
+      resolvers: [
+        UserResolver,
+        TaskResolver,
+        TagResolver,
+        ProjectResolver,
+        CategoryResolver
+      ],
       emitSchemaFile: './schema.graphql',
       validate: false
     }),

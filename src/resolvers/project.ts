@@ -11,6 +11,8 @@ import {
 import { postgresdb } from '../config/postgres-db.js'
 import { Project, ProjectInput } from '../entities/project.js'
 import { Context } from '../types.js'
+import { In } from 'typeorm'
+import { Category } from '../entities/category.js'
 
 @Resolver(Project)
 export class ProjectResolver {
@@ -19,7 +21,7 @@ export class ProjectResolver {
   async projects(@Ctx() { req }: Context): Promise<Project[]> {
     return await postgresdb.getRepository(Project).find({
       where: { user: { id: req.user?.id } },
-      relations: ['user'],
+      relations: ['user', 'categories'],
       order: { createdAt: 'ASC' }
     })
   }
@@ -47,14 +49,30 @@ export class ProjectResolver {
     @Arg('description', () => String, { nullable: true }) description: string,
     @Ctx() { req }: Context
   ): Promise<Project> {
-    await postgresdb
-      .getRepository(Project)
-      .create({ name, description, user: { id: req.user?.id } })
+    const categoryRepository = postgresdb.getRepository(Category)
+    const projectRepository = postgresdb.getRepository(Project)
+
+    const categories = await categoryRepository.findBy({
+      id: In([
+        '86f0f9d9-bddc-4233-b9c3-c569f7f72571',
+        '95302ba4-7ec7-475e-9b3a-19e7249435ed',
+        '7e22226d-1cb4-4c4f-8713-5fc8a405e5c7',
+        '3936ae14-52cd-4dd4-b230-de9c2e871780'
+      ])
+    })
+
+    await projectRepository
+      .create({
+        name,
+        description,
+        categories,
+        user: { id: req.user?.id }
+      })
       .save()
 
     return await postgresdb.getRepository(Project).findOne({
       where: { name, user: { id: req.user?.id } },
-      relations: ['user']
+      relations: ['user', 'categories']
     })
   }
 
@@ -95,5 +113,67 @@ export class ProjectResolver {
     await postgresdb.getRepository(Project).delete({ id })
 
     return true
+  }
+
+  @UseMiddleware(isAuthenticated)
+  @Mutation(() => Project)
+  async addCategory(
+    @Arg('projectId', () => ID) projectId: string,
+    @Arg('categoryId', () => ID) categoryId: string,
+    @Ctx() { req }: Context
+  ): Promise<Project> {
+    const projectRepository = postgresdb.getRepository(Project)
+    const categoryRepository = postgresdb.getRepository(Category)
+
+    const project = await projectRepository.findOne({
+      where: { id: projectId, user: { id: req.user?.id } },
+      relations: ['user', 'categories']
+    })
+
+    if (!project) throw new Error('Project not found with that id')
+
+    const category = await categoryRepository.findOneBy({ id: categoryId })
+
+    if (!category) throw new Error('Category not found with that id')
+
+    project.categories.push(category)
+
+    await projectRepository.save(project)
+
+    return await projectRepository.findOne({
+      where: { id: projectId, user: { id: req.user?.id } },
+      relations: ['user', 'categories']
+    })
+  }
+
+  @UseMiddleware(isAuthenticated)
+  @Mutation(() => Project)
+  async removeCategory(
+    @Arg('projectId', () => ID) projectId: string,
+    @Arg('categoryId', () => ID) categoryId: string,
+    @Ctx() { req }: Context
+  ): Promise<Project> {
+    const projectRepository = postgresdb.getRepository(Project)
+    const categoryRepository = postgresdb.getRepository(Category)
+
+    const project = await projectRepository.findOne({
+      where: { id: projectId, user: { id: req.user?.id } },
+      relations: ['user', 'categories']
+    })
+
+    if (!project) throw new Error('Project not found with that id')
+
+    const category = await categoryRepository.findOneBy({ id: categoryId })
+
+    if (!category) throw new Error('Category not found with that id')
+
+    project.categories = project.categories.filter((c) => c.id !== category.id)
+
+    await projectRepository.save(project)
+
+    return await projectRepository.findOne({
+      where: { id: projectId, user: { id: req.user?.id } },
+      relations: ['user', 'categories']
+    })
   }
 }

@@ -8,6 +8,21 @@ type AuthUser {
   user: User!
 }
 
+type Category {
+  createdAt: DateTimeISO!
+  id: ID!
+  name: String!
+  status: String!
+  updatedAt: DateTimeISO!
+  user: User
+}
+
+input CategoryInput {
+  id: ID
+  name: String
+  status: String
+}
+
 """
 A date-time string at UTC, such as 2007-12-03T10:15:30Z, compliant with the `date-time` format outlined in section 5.6 of the RFC 3339 profile of the ISO 8601 standard for representation of dates and times using the Gregorian calendar.This scalar is serialized to a string in ISO 8601 format and parsed from a string in ISO 8601 format.
 """
@@ -18,15 +33,20 @@ type LogoutUser {
 }
 
 type Mutation {
+  addCategory(categoryId: ID!, projectId: ID!): Project!
   addTags(tagIds: [ID!]!, taskId: ID!): Task!
+  createCategory(name: String!, status: String!): Category!
   createProject(description: String, name: String!): Project!
   createTag(input: TagInput!): Tag!
   createTask(input: TaskInput!): Task!
   createUser(email: String!, password: String!, username: String!): AuthUser!
+  deleteCategory(id: ID!): Boolean!
   deleteProject(id: ID!): Boolean!
   deleteTag(id: ID!): Boolean!
   deleteTask(id: ID!): Task!
   login(email: String!, password: String!): AuthUser!
+  removeCategory(categoryId: ID!, projectId: ID!): Project!
+  updateCategory(input: CategoryInput!): Category!
   updateProject(input: ProjectInput!): Project!
   updateTag(input: TagInput!): Tag!
   updateTask(input: TaskInput!): Task!
@@ -34,6 +54,7 @@ type Mutation {
 }
 
 type Project {
+  categories: [Category!]!
   createdAt: DateTimeISO!
   description: String
   dueDate: DateTimeISO
@@ -41,14 +62,6 @@ type Project {
   name: String!
   updatedAt: DateTimeISO!
   user: User!
-}
-
-"""The status of the task described on project board"""
-enum ProjectBoardStatus {
-  Complete
-  InProgress
-  Open
-  Review
 }
 
 input ProjectInput {
@@ -59,6 +72,8 @@ input ProjectInput {
 }
 
 type Query {
+  categories: [Category!]!
+  category(id: ID!): Category!
   getUserByEmail(email: String!): User!
   logout: LogoutUser
   me: User
@@ -93,7 +108,7 @@ type Task {
   id: ID!
   project: Project
   startDate: DateTimeISO
-  status: ProjectBoardStatus!
+  status: String!
   tags: [Tag!]!
   title: String!
   updatedAt: DateTimeISO!
@@ -107,7 +122,7 @@ input TaskInput {
   id: ID
   projectId: ID!
   startDate: DateTimeISO
-  status: ProjectBoardStatus = Open
+  status: String = "Open"
   tagIds: [ID!]
   title: String
 }

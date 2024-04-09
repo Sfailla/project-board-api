@@ -9,11 +9,11 @@ type AuthUser {
 }
 
 type Category {
-  createdAt: DateTimeISO!
+  createdAt: DateTimeISO
   id: ID!
   name: String!
   status: String!
-  updatedAt: DateTimeISO!
+  updatedAt: DateTimeISO
   user: User
 }
 

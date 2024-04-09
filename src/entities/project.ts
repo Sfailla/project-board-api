@@ -8,9 +8,12 @@ import {
   UpdateDateColumn,
   ManyToOne,
   Unique,
-  JoinColumn
+  JoinColumn,
+  JoinTable,
+  ManyToMany
 } from 'typeorm'
 import { User } from './user.js'
+import { Category } from './category.js'
 
 @Entity()
 @ObjectType()
@@ -20,11 +23,6 @@ export class Project extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Field(() => User)
-  @JoinColumn({ name: 'user' })
-  @ManyToOne(() => User, (user) => user.id)
-  user: User
-
   @Field(() => String)
   @Column()
   name: string
@@ -32,6 +30,18 @@ export class Project extends BaseEntity {
   @Field(() => String, { nullable: true })
   @Column({ nullable: true })
   description?: string
+
+  @Field(() => [Category])
+  @JoinTable({ name: 'project_category' })
+  @ManyToMany(() => Category, (category) => category.id, {
+    onDelete: 'CASCADE'
+  })
+  categories: Category[]
+
+  @Field(() => User)
+  @JoinColumn({ name: 'user' })
+  @ManyToOne(() => User, (user) => user.id)
+  user: User
 
   @Field(() => Date, { nullable: true })
   @Column({ nullable: true })

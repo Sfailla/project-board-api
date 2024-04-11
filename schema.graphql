@@ -43,14 +43,16 @@ type Mutation {
   deleteCategory(id: ID!): Boolean!
   deleteProject(id: ID!): Boolean!
   deleteTag(id: ID!): Boolean!
-  deleteTask(id: ID!): Task!
+  deleteTask(id: ID!): Boolean!
+  deleteUser: Boolean!
   login(email: String!, password: String!): AuthUser!
   removeCategory(categoryId: ID!, projectId: ID!): Project!
+  removeTags(tagIds: [ID!]!, taskId: ID!): Task!
   updateCategory(input: CategoryInput!): Category!
   updateProject(input: ProjectInput!): Project!
   updateTag(input: TagInput!): Tag!
   updateTask(input: TaskInput!): Task!
-  updateUser(input: UpdateUserInput!): User!
+  updateUser(input: UserInput!): User!
 }
 
 type Project {
@@ -127,16 +129,6 @@ input TaskInput {
   title: String
 }
 
-input UpdateUserInput {
-  avatar: String
-  company: String
-  email: String!
-  firstname: String
-  lastname: String
-  position: String
-  username: String!
-}
-
 type User {
   avatar: String
   company: String
@@ -149,5 +141,15 @@ type User {
   password: String
   position: String
   updatedAt: DateTimeISO
+  username: String!
+}
+
+input UserInput {
+  avatar: String
+  company: String
+  email: String!
+  firstname: String
+  lastname: String
+  position: String
   username: String!
 }

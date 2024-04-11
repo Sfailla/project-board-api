@@ -11,7 +11,6 @@ import {
 import { postgresdb } from '../config/postgres-db.js'
 import { Project, ProjectInput } from '../entities/project.js'
 import { Context } from '../types.js'
-import { In } from 'typeorm'
 import { Category } from '../entities/category.js'
 
 @Resolver(Project)
@@ -34,7 +33,7 @@ export class ProjectResolver {
   ): Promise<Project> {
     const project = await postgresdb.getRepository(Project).findOne({
       where: { id, user: { id: req.user?.id } },
-      relations: ['user']
+      relations: ['user', 'categories']
     })
 
     if (!project) throw new Error('Project not found with that id')
@@ -52,13 +51,8 @@ export class ProjectResolver {
     const categoryRepository = postgresdb.getRepository(Category)
     const projectRepository = postgresdb.getRepository(Project)
 
-    const categories = await categoryRepository.findBy({
-      id: In([
-        '86f0f9d9-bddc-4233-b9c3-c569f7f72571',
-        '95302ba4-7ec7-475e-9b3a-19e7249435ed',
-        '7e22226d-1cb4-4c4f-8713-5fc8a405e5c7',
-        '3936ae14-52cd-4dd4-b230-de9c2e871780'
-      ])
+    const categories = await categoryRepository.find({
+      where: { user: { id: req.user?.id } }
     })
 
     await projectRepository

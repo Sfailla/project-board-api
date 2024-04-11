@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 import { CookieOptions, Response } from 'express'
 import { JwtCredentials, JwtTokenUser } from '../types.js'
-import jwt from 'jsonwebtoken'
 
 export const encryptPassword = async (password: string): Promise<string> => {
   return await bcrypt.hash(password, Number(process.env.BCRYPT_SALT_ROUNDS))

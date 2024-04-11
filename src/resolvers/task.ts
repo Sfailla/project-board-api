@@ -22,15 +22,11 @@ export class TaskResolver {
     @Arg('projectId', () => ID) projectId: string,
     @Ctx() { req }: Context
   ): Promise<Task[]> {
-    return await postgresdb
-      .getRepository(Task)
-      .createQueryBuilder('task')
-      .leftJoinAndSelect('task.tags', 'tags')
-      .leftJoinAndSelect('task.user', 'user')
-      .leftJoinAndSelect('task.project', 'project')
-      .where('task.project = :projectId', { projectId })
-      .andWhere('task.user = :userId', { userId: req.user?.id })
-      .getMany()
+    return await postgresdb.getRepository(Task).find({
+      where: { project: { id: projectId }, user: { id: req.user?.id } },
+      relations: ['user', 'project', 'tags'],
+      order: { createdAt: 'ASC' }
+    })
   }
 
   @UseMiddleware(isAuthenticated)
@@ -59,7 +55,7 @@ export class TaskResolver {
     const taskRepository = postgresdb.getRepository(Task)
 
     const tags =
-      (await tagRepository.findBy({ id: In([...taskInput.tagIds]) })) || []
+      (await tagRepository.findBy({ id: In(taskInput.tagIds) })) || []
 
     const task = taskRepository.create({
       ...taskInput,
@@ -74,39 +70,6 @@ export class TaskResolver {
       where: { id: task.id, user: { id: req.user?.id } },
       relations: ['user', 'project', 'tags']
     })
-  }
-
-  @UseMiddleware(isAuthenticated)
-  @Mutation(() => Task)
-  async addTags(
-    @Arg('taskId', () => ID) taskId: string,
-    @Arg('tagIds', () => [ID]) tagIds: string[],
-    @Ctx() { req }: Context
-  ): Promise<Task> {
-    const taskRepository = postgresdb.getRepository(Task)
-    const tagRepository = postgresdb.getRepository(Tag)
-
-    const task = await taskRepository
-      .createQueryBuilder('task')
-      .leftJoinAndSelect('task.tags', 'tags')
-      .leftJoinAndSelect('task.user', 'user')
-      .leftJoinAndSelect('task.project', 'project')
-      .where('task.id = :taskId', { taskId })
-      .andWhere('task.user = :userId', { userId: req.user?.id })
-      .getOne()
-
-    if (!task) throw new Error('Task not found with that id')
-
-    const tags = await tagRepository.findBy({ id: In(tagIds) })
-
-    if (tags.length !== tagIds.length)
-      throw new Error('Some tags were not found')
-
-    task.tags = [...task.tags, ...tags]
-
-    await taskRepository.save(task)
-
-    return task
   }
 
   @UseMiddleware(isAuthenticated)
@@ -145,11 +108,11 @@ export class TaskResolver {
   }
 
   @UseMiddleware(isAuthenticated)
-  @Mutation(() => Task)
+  @Mutation(() => Boolean)
   async deleteTask(
     @Arg('id', () => ID) id: string,
     @Ctx() { req }: Context
-  ): Promise<Task> {
+  ): Promise<boolean> {
     const task = await postgresdb.getRepository(Task).findOne({
       where: { id, user: { id: req.user?.id } },
       relations: ['user', 'project']
@@ -157,6 +120,78 @@ export class TaskResolver {
 
     if (!task) throw new Error('No task found with that id')
 
-    return await postgresdb.getRepository(Task).remove(task)
+    await postgresdb.getRepository(Task).remove(task)
+
+    return true
+  }
+
+  @UseMiddleware(isAuthenticated)
+  @Mutation(() => Task)
+  async addTags(
+    @Arg('taskId', () => ID) taskId: string,
+    @Arg('tagIds', () => [ID]) tagIds: string[],
+    @Ctx() { req }: Context
+  ): Promise<Task> {
+    const taskRepository = postgresdb.getRepository(Task)
+    const tagRepository = postgresdb.getRepository(Tag)
+
+    const task = await taskRepository.findOne({
+      where: { id: taskId, user: { id: req.user?.id } },
+      relations: ['user', 'project', 'tags']
+    })
+
+    if (!task) throw new Error('Task not found with that id')
+
+    const tags = await tagRepository.find({
+      where: { id: In(tagIds), user: { id: req.user?.id } },
+      relations: ['user']
+    })
+
+    if (tags.length !== tagIds.length)
+      throw new Error('Some tags were not found')
+
+    task.tags = [...task.tags, ...tags]
+
+    await taskRepository.save(task)
+
+    return await taskRepository.findOne({
+      where: { id: taskId, user: { id: req.user?.id } },
+      relations: ['user', 'project', 'tags']
+    })
+  }
+
+  @UseMiddleware(isAuthenticated)
+  @Mutation(() => Task)
+  async removeTags(
+    @Arg('taskId', () => ID) taskId: string,
+    @Arg('tagIds', () => [ID]) tagIds: string[],
+    @Ctx() { req }: Context
+  ): Promise<Task> {
+    const taskRepository = postgresdb.getRepository(Task)
+    const tagRepository = postgresdb.getRepository(Tag)
+
+    const task = await taskRepository.findOne({
+      where: { id: taskId, user: { id: req.user?.id } },
+      relations: ['user', 'project', 'tags']
+    })
+
+    if (!task) throw new Error('Task not found with that id')
+
+    const tags = await tagRepository.find({
+      where: { id: In(tagIds), user: { id: req.user?.id } },
+      relations: ['user']
+    })
+
+    if (tags.length !== tagIds.length)
+      throw new Error('Some tags were not found')
+
+    task.tags = task.tags.filter((t) => !tagIds.includes(t.id))
+
+    await taskRepository.save(task)
+
+    return await taskRepository.findOne({
+      where: { id: taskId, user: { id: req.user?.id } },
+      relations: ['user', 'project', 'tags']
+    })
   }
 }

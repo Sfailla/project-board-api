@@ -1,3 +1,15 @@
+import { Context } from '../types.js'
+import { postgresdb } from '../config/postgres-db.js'
+import { isAuthenticated } from '../middleware/isAuthenticated.js'
+import {
+  decryptPassword,
+  encryptPassword,
+  generateAuthToken
+} from '../utils/helper-fns.js'
+import {
+  createDefaultCategories,
+  createDefaultTags
+} from '../utils/db-utils.js'
 import {
   Arg,
   Ctx,
@@ -6,20 +18,7 @@ import {
   Resolver,
   UseMiddleware
 } from 'type-graphql'
-import {
-  UpdateUserInput,
-  User,
-  AuthUser,
-  LogoutUser
-} from '../entities/user.js'
-import { Context } from '../types.js'
-import { postgresdb } from '../config/postgres-db.js'
-import {
-  decryptPassword,
-  encryptPassword,
-  generateAuthToken
-} from '../utils/helper-fns.js'
-import { isAuthenticated } from '../middleware/isAuthenticated.js'
+import { UserInput, User, AuthUser, LogoutUser } from '../entities/user.js'
 
 @Resolver()
 export class UserResolver {
@@ -80,6 +79,9 @@ export class UserResolver {
 
     res.set('x-auth-token', token)
 
+    await createDefaultCategories(user)
+    await createDefaultTags(user)
+
     return { user, token }
   }
 
@@ -114,7 +116,7 @@ export class UserResolver {
   @UseMiddleware(isAuthenticated)
   @Mutation(() => User)
   async updateUser(
-    @Arg('input') userInput: UpdateUserInput,
+    @Arg('input') userInput: UserInput,
     @Ctx() { req }: Context
   ): Promise<User> {
     const user = await postgresdb
@@ -130,5 +132,21 @@ export class UserResolver {
     return await postgresdb
       .getRepository(User)
       .findOne({ where: { id: req.user?.id } })
+  }
+
+  @UseMiddleware(isAuthenticated)
+  @Mutation(() => Boolean)
+  async deleteUser(@Ctx() { req }: Context): Promise<boolean> {
+    const user = await postgresdb
+      .getRepository(User)
+      .findOne({ where: { id: req.user?.id } })
+
+    if (!user) {
+      throw new Error('User not found')
+    }
+
+    await postgresdb.getRepository(User).delete(req.user?.id)
+
+    return true
   }
 }

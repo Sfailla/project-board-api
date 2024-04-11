@@ -17,18 +17,10 @@ export class TagResolver {
   @UseMiddleware(isAuthenticated)
   @Query(() => [Tag])
   async tags(@Ctx() { req }: Context): Promise<Tag[]> {
-    const defaultTags = await postgresdb
-      .getRepository(Tag)
-      .createQueryBuilder('tag')
-      .where('tag.user IS NULL')
-      .getMany()
-
-    const userTags = await postgresdb.getRepository(Tag).find({
+    return await postgresdb.getRepository(Tag).find({
       where: { user: { id: req.user?.id } },
       relations: ['user']
     })
-
-    return [...defaultTags, ...userTags]
   }
 
   @UseMiddleware(isAuthenticated)

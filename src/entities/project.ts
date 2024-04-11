@@ -40,7 +40,9 @@ export class Project extends BaseEntity {
 
   @Field(() => User)
   @JoinColumn({ name: 'user' })
-  @ManyToOne(() => User, (user) => user.id)
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE'
+  })
   user: User
 
   @Field(() => Date, { nullable: true })

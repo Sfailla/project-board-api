@@ -79,7 +79,7 @@ export class LogoutUser {
 }
 
 @InputType()
-export class UpdateUserInput implements Partial<User> {
+export class UserInput implements Partial<User> {
   @Field(() => String)
   username: string
 

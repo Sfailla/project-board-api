@@ -7,19 +7,21 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
-  Column
+  Column,
+  Unique
 } from 'typeorm'
 import { User } from './user.js'
 
 @Entity()
 @ObjectType()
+@Unique('UQ_CATEGORY_NAME', ['name', 'user'])
 export class Category extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Field(() => String)
-  @Column({ unique: true })
+  @Column()
   name: string
 
   @Field(() => String)
@@ -28,8 +30,10 @@ export class Category extends BaseEntity {
 
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'user' })
-  @ManyToOne(() => User, (user) => user.id)
-  user: User | null
+  @ManyToOne(() => User, (user) => user.id, {
+    onDelete: 'CASCADE'
+  })
+  user: User
 
   @Field(() => Date, { nullable: true })
   @CreateDateColumn()

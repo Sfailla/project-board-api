@@ -13,15 +13,15 @@ import {
 import { User } from './user.js'
 
 @Entity()
-@Unique('UQ_TAG_NAME', ['name', 'user'])
 @ObjectType()
+@Unique('UQ_TAG_NAME', ['name', 'user'])
 export class Tag extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string
 
   @Field(() => String)
-  @Column({ unique: true })
+  @Column()
   name: string
 
   @Field(() => String)

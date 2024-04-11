@@ -1,3 +1,7 @@
+import { postgresdb } from '../config/postgres-db.js'
+import { Context } from '../types.js'
+import { isAuthenticated } from '../middleware/isAuthenticated.js'
+import { Category, CategoryInput } from '../entities/category.js'
 import {
   Arg,
   Ctx,
@@ -7,28 +11,16 @@ import {
   Resolver,
   UseMiddleware
 } from 'type-graphql'
-import { postgresdb } from '../config/postgres-db.js'
-import { Context } from '../types.js'
-import { isAuthenticated } from '../middleware/isAuthenticated.js'
-import { Category, CategoryInput } from '../entities/category.js'
 
 @Resolver()
 export class CategoryResolver {
   @UseMiddleware(isAuthenticated)
   @Query(() => [Category])
   async categories(@Ctx() { req }: Context): Promise<Category[]> {
-    const defaultCategories = await postgresdb
-      .getRepository(Category)
-      .createQueryBuilder('category')
-      .where('category.user IS NULL')
-      .getMany()
-
-    const userCategories = await postgresdb.getRepository(Category).find({
+    return await postgresdb.getRepository(Category).find({
       where: { user: { id: req.user?.id } },
       relations: ['user']
     })
-
-    return [...defaultCategories, ...userCategories]
   }
 
   @UseMiddleware(isAuthenticated)

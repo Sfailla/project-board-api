@@ -1,7 +1,7 @@
 {
-  "name": "node-typescript-boilerplate",
+  "name": "project-board-api",
   "version": "0.0.0",
-  "description": "Minimalistic boilerplate to quick-start Node.js development in TypeScript.",
+  "description": "postgresql, typeorm, type-graphql, express, apollo-server and typescript backend for ng-project-board application",
   "type": "module",
   "engines": {
     "node": ">= 18 < 21"

@@ -80,10 +80,10 @@ export class LogoutUser {
 
 @InputType()
 export class UserInput implements Partial<User> {
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   username: string
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   email: string
 
   @Field(() => String, { nullable: true })

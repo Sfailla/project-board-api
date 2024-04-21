@@ -24,9 +24,10 @@ export class Task extends BaseEntity {
   @PrimaryGeneratedColumn('uuid')
   id: string
 
-  @Field(() => Project, { nullable: true })
+  @Field(() => Project)
   @JoinColumn({ name: 'project' })
   @ManyToOne(() => Project, (project) => project.id, {
+    eager: true,
     onDelete: 'CASCADE'
   })
   project: Project
@@ -34,6 +35,7 @@ export class Task extends BaseEntity {
   @Field(() => [Tag], { defaultValue: [] })
   @JoinTable({ name: 'task_tags' })
   @ManyToMany(() => Tag, (tag) => tag.id, {
+    eager: true,
     onDelete: 'CASCADE'
   })
   tags: Tag[]
@@ -41,6 +43,7 @@ export class Task extends BaseEntity {
   @Field(() => User)
   @JoinColumn({ name: 'user' })
   @ManyToOne(() => User, (user) => user.id, {
+    eager: true,
     onDelete: 'CASCADE'
   })
   user: User

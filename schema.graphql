@@ -57,12 +57,12 @@ type Mutation {
 
 type Project {
   categories: [Category!]!
-  createdAt: DateTimeISO!
+  createdAt: DateTimeISO
   description: String
   dueDate: DateTimeISO
   id: ID!
   name: String!
-  updatedAt: DateTimeISO!
+  updatedAt: DateTimeISO
   user: User!
 }
 
@@ -89,10 +89,10 @@ type Query {
 
 type Tag {
   color: String!
-  createdAt: DateTimeISO!
+  createdAt: DateTimeISO
   id: ID!
   name: String!
-  updatedAt: DateTimeISO!
+  updatedAt: DateTimeISO
   user: User
 }
 
@@ -108,7 +108,7 @@ type Task {
   description: String
   endDate: DateTimeISO
   id: ID!
-  project: Project
+  project: Project!
   startDate: DateTimeISO
   status: String!
   tags: [Tag!]!
@@ -147,9 +147,9 @@ type User {
 input UserInput {
   avatar: String
   company: String
-  email: String!
+  email: String
   firstname: String
   lastname: String
   position: String
-  username: String!
+  username: String
 }

@@ -34,6 +34,7 @@ export class Project extends BaseEntity {
   @Field(() => [Category])
   @JoinTable({ name: 'project_category' })
   @ManyToMany(() => Category, (category) => category.id, {
+    eager: true,
     onDelete: 'CASCADE'
   })
   categories: Category[]
@@ -41,6 +42,7 @@ export class Project extends BaseEntity {
   @Field(() => User)
   @JoinColumn({ name: 'user' })
   @ManyToOne(() => User, (user) => user.id, {
+    eager: true,
     onDelete: 'CASCADE'
   })
   user: User
@@ -49,11 +51,11 @@ export class Project extends BaseEntity {
   @Column({ nullable: true })
   dueDate?: Date
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @CreateDateColumn()
   createdAt: Date
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
   updatedAt: Date
 }

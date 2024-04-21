@@ -31,6 +31,7 @@ export class Category extends BaseEntity {
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'user' })
   @ManyToOne(() => User, (user) => user.id, {
+    eager: true,
     onDelete: 'CASCADE'
   })
   user: User

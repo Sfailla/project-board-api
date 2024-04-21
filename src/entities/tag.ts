@@ -31,15 +31,16 @@ export class Tag extends BaseEntity {
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'user' })
   @ManyToOne(() => User, (user) => user.id, {
+    eager: true,
     onDelete: 'CASCADE'
   })
   user: User
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @CreateDateColumn()
   createdAt?: Date
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @UpdateDateColumn()
   updatedAt?: Date
 }

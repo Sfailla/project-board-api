@@ -7,16 +7,12 @@ export const isAuthenticated: MiddlewareFn<Context> = async (
   next
 ): Promise<void | NextFn | Error> => {
   console.log({ token })
-  // const cookieToken = req.signedCookies['x-auth-token'] as string
-  if (!token) {
-    throw new Error('Not authenticated')
-  }
+  if (!token) throw new Error('Not authenticated')
 
   try {
-    const payload = jwt.verify(
-      String(token),
-      String(process.env.JWT_TOKEN_SECRET)
-    ) as { user: JwtTokenUser }
+    const payload = <{ user: JwtTokenUser }>(
+      jwt.verify(String(token), String(process.env.JWT_TOKEN_SECRET))
+    )
 
     req.user = payload.user
   } catch (err) {

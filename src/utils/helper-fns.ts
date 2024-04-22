@@ -17,9 +17,7 @@ export const decryptPassword = async (
 export const verifyToken = (
   token: string,
   secret: jwt.Secret
-): string | jwt.JwtPayload => {
-  return jwt.verify(token, secret)
-}
+): string | jwt.JwtPayload => jwt.verify(token, secret)
 
 export const generateAuthToken = (user: JwtTokenUser): string => {
   const credentials: JwtCredentials = {

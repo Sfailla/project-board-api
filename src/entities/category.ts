@@ -1,4 +1,4 @@
-import { Field, ID, InputType, ObjectType } from 'type-graphql'
+import { Field, ID, InputType, Int, ObjectType } from 'type-graphql'
 import {
   Entity,
   BaseEntity,
@@ -28,6 +28,10 @@ export class Category extends BaseEntity {
   @Column()
   status: string
 
+  @Field(() => Int)
+  @Column()
+  displayOrder: number
+
   @Field(() => User, { nullable: true })
   @JoinColumn({ name: 'user' })
   @ManyToOne(() => User, (user) => user.id, {
@@ -55,4 +59,7 @@ export class CategoryInput implements Partial<Category> {
 
   @Field(() => String, { nullable: true })
   status?: string
+
+  @Field(() => Int, { nullable: true })
+  displayOrder?: number
 }

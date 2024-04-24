@@ -77,6 +77,31 @@ export class CategoryResolver {
   }
 
   @UseMiddleware(isAuthenticated)
+  @Mutation(() => [Category])
+  async updateCategories(
+    @Arg('updatedCategories', () => [CategoryInput])
+    updatedCategories: CategoryInput[],
+    @Ctx() { req }: Context
+  ): Promise<Category[]> {
+    const entityManager = postgresdb.manager
+
+    await entityManager.transaction(async (transactionalEntityManager) => {
+      for (const category of updatedCategories) {
+        await transactionalEntityManager
+          .getRepository(Category)
+          .update(category.id, {
+            displayOrder: category.displayOrder
+          })
+      }
+    })
+
+    return await postgresdb.getRepository(Category).find({
+      where: { user: { id: req.user?.id } },
+      relations: ['user']
+    })
+  }
+
+  @UseMiddleware(isAuthenticated)
   @Mutation(() => Boolean)
   async deleteCategory(
     @Arg('id', () => ID) id: string,

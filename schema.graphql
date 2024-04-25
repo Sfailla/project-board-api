@@ -55,7 +55,16 @@ type Mutation {
   updateProject(input: ProjectInput!): Project!
   updateTag(input: TagInput!): Tag!
   updateTask(input: TaskInput!): Task!
+  updateTaskOrderAndPosition(input: OrderAndPositionInput!): Boolean!
   updateUser(input: UserInput!): User!
+}
+
+input OrderAndPositionInput {
+  newCategoryId: ID!
+  newPosition: Int!
+  oldCategoryId: ID!
+  oldPosition: Int!
+  taskId: ID!
 }
 
 type Project {
@@ -109,6 +118,7 @@ type Task {
   assignee: String
   createdAt: DateTimeISO!
   description: String
+  displayOrder: Int!
   endDate: DateTimeISO
   id: ID!
   project: Project!
@@ -122,7 +132,9 @@ type Task {
 
 input TaskInput {
   assignee: String
+  categoryId: ID!
   description: String
+  displayOrder: Int
   endDate: DateTimeISO
   id: ID
   projectId: ID!

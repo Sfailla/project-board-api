@@ -45,10 +45,14 @@ export class CategoryResolver {
     @Arg('status', () => String) status: string,
     @Ctx() { req }: Context
   ): Promise<Category> {
-    await postgresdb
-      .getRepository(Category)
-      .create({ name, status, user: { id: req.user?.id } })
-      .save()
+    try {
+      await postgresdb
+        .getRepository(Category)
+        .create({ name, status, user: { id: req.user?.id } })
+        .save()
+    } catch (error) {
+      throw new Error('Error creating category')
+    }
 
     return await postgresdb.getRepository(Category).findOne({
       where: { name, user: { id: req.user?.id } },
@@ -68,7 +72,13 @@ export class CategoryResolver {
 
     if (!category) throw new Error('category not found with that id')
 
-    await postgresdb.getRepository(Category).update(category.id, categoryInput)
+    try {
+      await postgresdb
+        .getRepository(Category)
+        .update(category.id, categoryInput)
+    } catch (error) {
+      throw new Error('Error updating category')
+    }
 
     return await postgresdb.getRepository(Category).findOne({
       where: { id: categoryInput.id, user: { id: req.user?.id } },
@@ -78,22 +88,26 @@ export class CategoryResolver {
 
   @UseMiddleware(isAuthenticated)
   @Mutation(() => [Category])
-  async updateCategories(
+  async updateCategoriesDisplayOrder(
     @Arg('updatedCategories', () => [CategoryInput])
     updatedCategories: CategoryInput[],
     @Ctx() { req }: Context
   ): Promise<Category[]> {
     const entityManager = postgresdb.manager
 
-    await entityManager.transaction(async (transactionalEntityManager) => {
-      for (const category of updatedCategories) {
-        await transactionalEntityManager
-          .getRepository(Category)
-          .update(category.id, {
-            displayOrder: category.displayOrder
-          })
-      }
-    })
+    try {
+      await entityManager.transaction(async (transactionalEntityManager) => {
+        for (const category of updatedCategories) {
+          await transactionalEntityManager
+            .getRepository(Category)
+            .update(category.id, {
+              displayOrder: category.displayOrder
+            })
+        }
+      })
+    } catch (error) {
+      throw new Error('Error updating category display order')
+    }
 
     return await postgresdb.getRepository(Category).find({
       where: { user: { id: req.user?.id } },
@@ -113,8 +127,11 @@ export class CategoryResolver {
 
     if (!category) throw new Error('category not found with that id')
 
-    await postgresdb.getRepository(Category).remove(category)
-
-    return true
+    try {
+      await postgresdb.getRepository(Category).remove(category)
+      return true
+    } catch (error) {
+      throw new Error('Error deleting category')
+    }
   }
 }

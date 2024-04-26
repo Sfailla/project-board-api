@@ -44,10 +44,14 @@ export class TagResolver {
     @Arg('input') tagInput: TagInput,
     @Ctx() { req }: Context
   ): Promise<Tag> {
-    await postgresdb
-      .getRepository(Tag)
-      .create({ ...tagInput, user: { id: req.user?.id } })
-      .save()
+    try {
+      await postgresdb
+        .getRepository(Tag)
+        .create({ ...tagInput, user: { id: req.user?.id } })
+        .save()
+    } catch (error) {
+      throw new Error('Error creating tag')
+    }
 
     return await postgresdb.getRepository(Tag).findOne({
       where: { name: tagInput.name, user: { id: req.user?.id } },
@@ -67,7 +71,11 @@ export class TagResolver {
 
     if (!tag) throw new Error('tag not found with that id')
 
-    await postgresdb.getRepository(Tag).update(tag.id, tagInput)
+    try {
+      await postgresdb.getRepository(Tag).update(tag.id, tagInput)
+    } catch (error) {
+      throw new Error('Error updating tag')
+    }
 
     return await postgresdb.getRepository(Tag).findOne({
       where: { id: tagInput.id, user: { id: req.user?.id } },
@@ -87,7 +95,11 @@ export class TagResolver {
 
     if (!tag) throw new Error('tag not found with that id')
 
-    await postgresdb.getRepository(Tag).remove(tag)
+    try {
+      await postgresdb.getRepository(Tag).remove(tag)
+    } catch (error) {
+      throw new Error('Error deleting tag')
+    }
 
     return true
   }

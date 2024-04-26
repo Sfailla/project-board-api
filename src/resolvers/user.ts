@@ -31,23 +31,20 @@ export class UserResolver {
       .findOne({ where: { email } })
 
     if (!user) throw new Error('User not found')
+
     return user
   }
 
   @UseMiddleware(isAuthenticated)
   @Query(() => User, { nullable: true, complexity: 5 })
   async me(@Ctx() { req }: Context): Promise<User | null> {
-    if (!req.user?.id) {
-      return null
-    }
+    if (!req.user?.id) return null
 
     const user = await postgresdb
       .getRepository(User)
       .findOne({ where: { id: req.user.id } })
 
-    if (!user) {
-      return null
-    }
+    if (!user) return null
 
     return user
   }
@@ -66,23 +63,27 @@ export class UserResolver {
     @Arg('password', () => String) password: string,
     @Ctx() { res }: Context
   ): Promise<{ user: User; token: string }> {
-    const user = await postgresdb
-      .getRepository(User)
-      .create({
-        email,
-        username,
-        password: await encryptPassword(password)
-      })
-      .save()
+    try {
+      const user = await postgresdb
+        .getRepository(User)
+        .create({
+          email,
+          username,
+          password: await encryptPassword(password)
+        })
+        .save()
 
-    const token = generateAuthToken(user)
+      const token = generateAuthToken(user)
 
-    res.set('x-auth-token', token)
+      res.set('x-auth-token', token)
 
-    await createDefaultCategories(user)
-    await createDefaultTags(user)
+      await createDefaultCategories(user)
+      await createDefaultTags(user)
 
-    return { user, token }
+      return { user, token }
+    } catch (error) {
+      throw new Error('Error creating user')
+    }
   }
 
   @Mutation(() => AuthUser)
@@ -127,7 +128,11 @@ export class UserResolver {
       throw new Error('User not found')
     }
 
-    await postgresdb.getRepository(User).update(req.user?.id, userInput)
+    try {
+      await postgresdb.getRepository(User).update(req.user?.id, userInput)
+    } catch (error) {
+      throw new Error('Error updating user')
+    }
 
     return await postgresdb
       .getRepository(User)
@@ -145,7 +150,11 @@ export class UserResolver {
       throw new Error('User not found')
     }
 
-    await postgresdb.getRepository(User).delete(req.user?.id)
+    try {
+      await postgresdb.getRepository(User).delete(req.user?.id)
+    } catch (error) {
+      throw new Error('Error deleting user')
+    }
 
     return true
   }

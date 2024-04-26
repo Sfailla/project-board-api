@@ -66,11 +66,17 @@ export class TaskResolver {
       tags
     })
 
-    await taskRepository.save(task)
+    if (!task) throw new Error('Error creating task')
+
+    try {
+      await taskRepository.save(task)
+    } catch (error) {
+      throw new Error('Error saving task')
+    }
 
     return await taskRepository.findOne({
       where: { id: task.id, user: { id: req.user?.id } },
-      relations: ['user', 'project', 'tags']
+      relations: ['user', 'project', 'tags', 'category']
     })
   }
 
@@ -80,7 +86,9 @@ export class TaskResolver {
     @Arg('input') taskInput: TaskInput,
     @Ctx() { req }: Context
   ): Promise<Task> {
-    const task = await postgresdb.getRepository(Task).findOne({
+    const taskRepository = postgresdb.getRepository(Task)
+
+    const task = await taskRepository.findOne({
       where: {
         id: taskInput.id,
         user: { id: req.user?.id },
@@ -91,20 +99,15 @@ export class TaskResolver {
 
     if (!task) throw new Error('Task not found with that id')
 
-    const updates = Object.assign({
-      id: taskInput.id,
-      title: taskInput.title || task.title,
-      description: taskInput.description || task.description,
-      displayOrder: taskInput.displayOrder || task.displayOrder,
-      assignee: taskInput.assignee || task.assignee,
-      startDate: taskInput.startDate || task.startDate,
-      endDate: taskInput.endDate || task.endDate,
-      status: taskInput.status || task.status
-    })
+    const updates = { ...task, ...taskInput }
 
-    await postgresdb.getRepository(Task).update(task.id, updates)
+    try {
+      await taskRepository.update(task.id, updates)
+    } catch (error) {
+      throw new Error('Error updating task')
+    }
 
-    return await postgresdb.getRepository(Task).findOne({
+    return await taskRepository.findOne({
       where: { id: taskInput.id, user: { id: req.user?.id } },
       relations: ['user', 'project', 'tags', 'category']
     })
@@ -178,9 +181,12 @@ export class TaskResolver {
     if (tags.length !== tagIds.length)
       throw new Error('Some tags were not found')
 
-    task.tags = [...task.tags, ...tags]
-
-    await taskRepository.save(task)
+    try {
+      task.tags = [...task.tags, ...tags]
+      await taskRepository.save(task)
+    } catch (error) {
+      throw new Error('Error adding tags to task')
+    }
 
     return await taskRepository.findOne({
       where: { id: taskId, user: { id: req.user?.id } },
@@ -213,9 +219,12 @@ export class TaskResolver {
     if (tags.length !== tagIds.length)
       throw new Error('Some tags were not found')
 
-    task.tags = task.tags.filter((t) => !tagIds.includes(t.id))
-
-    await taskRepository.save(task)
+    try {
+      task.tags = task.tags.filter((t) => !tagIds.includes(t.id))
+      await taskRepository.save(task)
+    } catch (error) {
+      throw new Error('Error removing tags from task')
+    }
 
     return await taskRepository.findOne({
       where: { id: taskId, user: { id: req.user?.id } },

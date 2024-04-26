@@ -36,7 +36,7 @@ export const createDefaultTags = async (user: User): Promise<void> => {
     .execute()
 }
 
-export const updateTaskDisplayOrderPositionAndStatus = async (
+export const updateDisplayOrder = async (
   orderAndPositionInput: OrderAndPositionInput,
   ctx: Context
 ): Promise<void> => {

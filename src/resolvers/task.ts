@@ -13,7 +13,7 @@ import { Context } from '../types.js'
 import { isAuthenticated } from '../middleware/isAuthenticated.js'
 import { Tag } from '../entities/tag.js'
 import { In } from 'typeorm'
-import { updateTaskDisplayOrderPositionAndStatus } from '../utils/db-utils.js'
+import { updateDisplayOrder } from '../utils/db-utils.js'
 
 @Resolver()
 export class TaskResolver {
@@ -120,7 +120,7 @@ export class TaskResolver {
     @Ctx() ctx: Context
   ): Promise<Task[]> {
     try {
-      updateTaskDisplayOrderPositionAndStatus(orderAndPositionInput, ctx)
+      updateDisplayOrder(orderAndPositionInput, ctx)
 
       return await postgresdb.getRepository(Task).find({
         where: {

@@ -55,14 +55,20 @@ export class ProjectResolver {
       where: { user: { id: req.user?.id } }
     })
 
-    await projectRepository
-      .create({
-        name,
-        description,
-        categories,
-        user: { id: req.user?.id }
-      })
-      .save()
+    if (!categories.length) throw new Error('No categories found')
+
+    try {
+      await projectRepository
+        .create({
+          name,
+          description,
+          categories,
+          user: { id: req.user?.id }
+        })
+        .save()
+    } catch (error) {
+      throw new Error('Error creating new Project')
+    }
 
     return await postgresdb.getRepository(Project).findOne({
       where: { name, user: { id: req.user?.id } },
@@ -84,7 +90,11 @@ export class ProjectResolver {
 
     if (!project) throw new Error('Project not found with that id')
 
-    await postgresdb.getRepository(Project).update(id, projectInput)
+    try {
+      await postgresdb.getRepository(Project).update(id, projectInput)
+    } catch (error) {
+      throw new Error('Error updating project')
+    }
 
     return await postgresdb.getRepository(Project).findOne({
       where: { id, user: { id: req.user?.id } },
@@ -104,9 +114,12 @@ export class ProjectResolver {
 
     if (!project) throw new Error('Project not found with that id')
 
-    await postgresdb.getRepository(Project).delete({ id })
-
-    return true
+    try {
+      await postgresdb.getRepository(Project).delete({ id })
+      return true
+    } catch (error) {
+      throw new Error('Error deleting project')
+    }
   }
 
   @UseMiddleware(isAuthenticated)
@@ -132,7 +145,11 @@ export class ProjectResolver {
 
     project.categories.push(category)
 
-    await projectRepository.save(project)
+    try {
+      await projectRepository.save(project)
+    } catch (error) {
+      throw new Error('Error adding category to project')
+    }
 
     return await projectRepository.findOne({
       where: { id: projectId, user: { id: req.user?.id } },
@@ -163,7 +180,11 @@ export class ProjectResolver {
 
     project.categories = project.categories.filter((c) => c.id !== category.id)
 
-    await projectRepository.save(project)
+    try {
+      await projectRepository.save(project)
+    } catch (error) {
+      throw new Error('Error removing category from project')
+    }
 
     return await projectRepository.findOne({
       where: { id: projectId, user: { id: req.user?.id } },

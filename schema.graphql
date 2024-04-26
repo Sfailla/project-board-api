@@ -50,7 +50,7 @@ type Mutation {
   login(email: String!, password: String!): AuthUser!
   removeCategory(categoryId: ID!, projectId: ID!): Project!
   removeTags(tagIds: [ID!]!, taskId: ID!): Task!
-  updateCategories(updatedCategories: [CategoryInput!]!): [Category!]!
+  updateCategoriesDisplayOrder(updatedCategories: [CategoryInput!]!): [Category!]!
   updateCategory(input: CategoryInput!): Category!
   updateProject(input: ProjectInput!): Project!
   updateTag(input: TagInput!): Tag!

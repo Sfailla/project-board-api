@@ -1,5 +1,5 @@
 import { postgresdb } from '../config/postgres-db.js'
-import { Task, TaskInput } from '../entities/task.js'
+import { OrderAndPositionInput, Task, TaskInput } from '../entities/task.js'
 import {
   Arg,
   Ctx,
@@ -13,6 +13,7 @@ import { Context } from '../types.js'
 import { isAuthenticated } from '../middleware/isAuthenticated.js'
 import { Tag } from '../entities/tag.js'
 import { In } from 'typeorm'
+import { updateTaskDisplayOrderPositionAndStatus } from '../utils/db-utils.js'
 
 @Resolver()
 export class TaskResolver {
@@ -24,7 +25,7 @@ export class TaskResolver {
   ): Promise<Task[]> {
     return await postgresdb.getRepository(Task).find({
       where: { project: { id: projectId }, user: { id: req.user?.id } },
-      relations: ['user', 'project', 'tags'],
+      relations: ['user', 'project', 'tags', 'category'],
       order: { createdAt: 'ASC' }
     })
   }
@@ -61,6 +62,7 @@ export class TaskResolver {
       ...taskInput,
       user: { id: req.user?.id },
       project: { id: taskInput.projectId },
+      category: { id: taskInput.categoryId },
       tags
     })
 
@@ -93,6 +95,7 @@ export class TaskResolver {
       id: taskInput.id,
       title: taskInput.title || task.title,
       description: taskInput.description || task.description,
+      displayOrder: taskInput.displayOrder || task.displayOrder,
       assignee: taskInput.assignee || task.assignee,
       startDate: taskInput.startDate || task.startDate,
       endDate: taskInput.endDate || task.endDate,
@@ -103,8 +106,30 @@ export class TaskResolver {
 
     return await postgresdb.getRepository(Task).findOne({
       where: { id: taskInput.id, user: { id: req.user?.id } },
-      relations: ['user', 'project', 'tags']
+      relations: ['user', 'project', 'tags', 'category']
     })
+  }
+
+  @UseMiddleware(isAuthenticated)
+  @Mutation(() => [Task])
+  async updateTaskOrderAndPosition(
+    @Arg('input') orderAndPositionInput: OrderAndPositionInput,
+    @Ctx() ctx: Context
+  ): Promise<Task[]> {
+    try {
+      updateTaskDisplayOrderPositionAndStatus(orderAndPositionInput, ctx)
+
+      return await postgresdb.getRepository(Task).find({
+        where: {
+          project: { id: orderAndPositionInput.projectId },
+          user: { id: ctx.req.user?.id }
+        },
+        relations: ['user', 'project', 'tags', 'category'],
+        order: { createdAt: 'ASC' }
+      })
+    } catch (error) {
+      throw new Error('Error updating task order and position')
+    }
   }
 
   @UseMiddleware(isAuthenticated)
@@ -120,9 +145,12 @@ export class TaskResolver {
 
     if (!task) throw new Error('No task found with that id')
 
-    await postgresdb.getRepository(Task).remove(task)
-
-    return true
+    try {
+      await postgresdb.getRepository(Task).remove(task)
+      return true
+    } catch (error) {
+      throw new Error('Error deleting task')
+    }
   }
 
   @UseMiddleware(isAuthenticated)

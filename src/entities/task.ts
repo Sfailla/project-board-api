@@ -138,6 +138,9 @@ export class OrderAndPositionInput {
   @Field(() => ID)
   taskId: string
 
+  @Field(() => ID)
+  projectId: string
+
   @Field(() => String)
   status: string
 

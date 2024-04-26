@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID, InputType } from 'type-graphql'
+import { ObjectType, Field, ID, InputType, Int } from 'type-graphql'
 import {
   BaseEntity,
   PrimaryGeneratedColumn,
@@ -15,6 +15,7 @@ import {
 import { Project } from './project.js'
 import { User } from './user.js'
 import { Tag } from './tag.js'
+import { Category } from './category.js'
 
 @Entity()
 @Unique('UQ_TASK_TITLE', ['title', 'user'])
@@ -23,6 +24,34 @@ export class Task extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string
+
+  @Field(() => String)
+  @Column()
+  title: string
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  description?: string
+
+  @Field(() => String, { nullable: true })
+  @Column({ nullable: true })
+  assignee?: string
+
+  @Field(() => Date, { nullable: true })
+  @Column({ nullable: true })
+  startDate: Date
+
+  @Field(() => Date, { nullable: true })
+  @Column({ nullable: true })
+  endDate: Date
+
+  @Field(() => String, { defaultValue: 'open' })
+  @Column()
+  status: string
+
+  @Field(() => Int, { defaultValue: 0 })
+  @Column({ default: 0 })
+  displayOrder: number
 
   @Field(() => Project)
   @JoinColumn({ name: 'project' })
@@ -48,29 +77,13 @@ export class Task extends BaseEntity {
   })
   user: User
 
-  @Field(() => String)
-  @Column()
-  title: string
-
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  description?: string
-
-  @Field(() => String, { nullable: true })
-  @Column({ nullable: true })
-  assignee?: string
-
-  @Field(() => Date, { nullable: true })
-  @Column({ nullable: true })
-  startDate: Date
-
-  @Field(() => Date, { nullable: true })
-  @Column({ nullable: true })
-  endDate: Date
-
-  @Field(() => String, { defaultValue: 'Open' })
-  @Column()
-  status: string
+  @Field(() => Category)
+  @JoinColumn({ name: 'category' })
+  @ManyToOne(() => Category, (category) => category.id, {
+    eager: true,
+    onDelete: 'CASCADE'
+  })
+  category: Category
 
   @Field(() => Date)
   @CreateDateColumn()
@@ -88,6 +101,9 @@ export class TaskInput implements Partial<Task> {
 
   @Field(() => ID)
   projectId: string
+
+  @Field(() => ID)
+  categoryId: string
 
   @Field(() => String, { nullable: true })
   title?: string
@@ -112,4 +128,28 @@ export class TaskInput implements Partial<Task> {
     nullable: true
   })
   status?: string
+
+  @Field(() => Int, { nullable: true })
+  displayOrder?: number
+}
+
+@InputType()
+export class OrderAndPositionInput {
+  @Field(() => ID)
+  taskId: string
+
+  @Field(() => String)
+  status: string
+
+  @Field(() => ID)
+  oldCategoryId: string
+
+  @Field(() => ID)
+  newCategoryId: string
+
+  @Field(() => Int)
+  oldPosition: number
+
+  @Field(() => Int)
+  newPosition: number
 }

@@ -74,23 +74,21 @@ export const updateDisplayOrder = async (
         .execute()
 
       // Increase the displayOrder of tasks in the new category if newPosition is !== 0
-      if (newPosition !== 0) {
-        await taskRepository
-          .createQueryBuilder()
-          .update()
-          .set({ displayOrder: () => '"displayOrder" + 1' })
-          .where(
-            '"user" = :userId and "project" = :projectId and "category" = :newCategoryId and "displayOrder" >= :newPosition and "id" != :taskId',
-            {
-              userId: ctx.req.user?.id,
-              projectId,
-              newCategoryId,
-              newPosition,
-              taskId
-            }
-          )
-          .execute()
-      }
+      await taskRepository
+        .createQueryBuilder()
+        .update()
+        .set({ displayOrder: () => '"displayOrder" + 1' })
+        .where(
+          '"user" = :userId and "project" = :projectId and "category" = :newCategoryId and "displayOrder" >= :newPosition and "id" != :taskId',
+          {
+            userId: ctx.req.user?.id,
+            projectId,
+            newCategoryId,
+            newPosition,
+            taskId
+          }
+        )
+        .execute()
     } else {
       // The category hasn't changed, so just update the displayOrder of tasks that come before the moved task
       if (newPosition > oldPosition) {

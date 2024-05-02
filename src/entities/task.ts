@@ -49,8 +49,8 @@ export class Task extends BaseEntity {
   @Column()
   status: string
 
-  @Field(() => Int, { defaultValue: 0 })
-  @Column({ default: 0 })
+  @Field(() => Int)
+  @Column()
   displayOrder: number
 
   @Field(() => Project)

@@ -87,6 +87,9 @@ export class UserInput implements Partial<User> {
   email: string
 
   @Field(() => String, { nullable: true })
+  password: string
+
+  @Field(() => String, { nullable: true })
   firstname?: string
 
   @Field(() => String, { nullable: true })

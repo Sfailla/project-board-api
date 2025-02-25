@@ -70,7 +70,7 @@ export class ProjectResolver {
       throw new Error('Error creating new Project')
     }
 
-    return await postgresdb.getRepository(Project).findOne({
+    return await projectRepository.findOne({
       where: { name, user: { id: req.user?.id } },
       relations: ['user', 'categories']
     })
@@ -82,8 +82,10 @@ export class ProjectResolver {
     @Arg('input') projectInput: ProjectInput,
     @Ctx() { req }: Context
   ): Promise<Project> {
+    const projectRepository = postgresdb.getRepository(Project)
+
     const { id } = projectInput
-    const project = await postgresdb.getRepository(Project).findOne({
+    const project = await projectRepository.findOne({
       where: { id, user: { id: req.user?.id } },
       relations: ['user']
     })
@@ -91,12 +93,12 @@ export class ProjectResolver {
     if (!project) throw new Error('Project not found with that id')
 
     try {
-      await postgresdb.getRepository(Project).update(id, projectInput)
+      await projectRepository.update(id, projectInput)
     } catch (error) {
       throw new Error('Error updating project')
     }
 
-    return await postgresdb.getRepository(Project).findOne({
+    return await projectRepository.findOne({
       where: { id, user: { id: req.user?.id } },
       relations: ['user']
     })
@@ -108,14 +110,16 @@ export class ProjectResolver {
     @Arg('id', () => ID) id: string,
     @Ctx() { req }: Context
   ): Promise<boolean> {
-    const project = await postgresdb
-      .getRepository(Project)
-      .findOne({ where: { id, user: { id: req.user?.id } } })
+    const projectRepository = postgresdb.getRepository(Project)
+
+    const project = await projectRepository.findOne({
+      where: { id, user: { id: req.user?.id } }
+    })
 
     if (!project) throw new Error('Project not found with that id')
 
     try {
-      await postgresdb.getRepository(Project).delete({ id })
+      await projectRepository.delete({ id })
       return true
     } catch (error) {
       throw new Error('Error deleting project')

@@ -45,16 +45,17 @@ export class CategoryResolver {
     @Arg('status', () => String) status: string,
     @Ctx() { req }: Context
   ): Promise<Category> {
+    const categoryRepository = postgresdb.getRepository(Category)
+
     try {
-      await postgresdb
-        .getRepository(Category)
+      await categoryRepository
         .create({ name, status, user: { id: req.user?.id } })
         .save()
     } catch (error) {
       throw new Error('Error creating category')
     }
 
-    return await postgresdb.getRepository(Category).findOne({
+    return await categoryRepository.findOne({
       where: { name, user: { id: req.user?.id } },
       relations: ['user']
     })
@@ -66,21 +67,21 @@ export class CategoryResolver {
     @Arg('input') categoryInput: CategoryInput,
     @Ctx() { req }: Context
   ): Promise<Category> {
-    const category = await postgresdb.getRepository(Category).findOne({
+    const categoryRepository = postgresdb.getRepository(Category)
+
+    const category = await categoryRepository.findOne({
       where: { id: categoryInput.id, user: { id: req.user?.id } }
     })
 
     if (!category) throw new Error('category not found with that id')
 
     try {
-      await postgresdb
-        .getRepository(Category)
-        .update(category.id, categoryInput)
+      await categoryRepository.update(category.id, categoryInput)
     } catch (error) {
       throw new Error('Error updating category')
     }
 
-    return await postgresdb.getRepository(Category).findOne({
+    return await categoryRepository.findOne({
       where: { id: categoryInput.id, user: { id: req.user?.id } },
       relations: ['user']
     })
